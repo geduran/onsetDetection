@@ -1,0 +1,23 @@
+CNN:
+    Uses CTQ (48 bins, 12 per octave -C5 in 523 Hz-) + Mel (24 frecs, fmax 600). CQT are downsampled to 24 by mean averaging.
+    Takes 32 timesteps of len 1024 (for Mel) with 128 hop.
+    Squared filters 
+    p             = [7, 5, 3, 3]   # Conv2D mask size
+    d             = [5, 8, 12,16]   # Conv2D channels
+    f             = [20]
+    droprate      = 0.25
+    Binary_Crossentropy loss
+    Adam optimizer
+
+RNN:
+    Uses CTQ (48 bins, 12 per octave -C5 in 523 Hz-) + Mel (24 frecs, fmax 600)
+    Takes 30 timesteps of len 1024 (for Mel) with 128 hop.
+    40 hidden units per layer
+    two LSTM in each layer
+    dropout (0.25) after last layer
+    Binary_Crossentropy loss
+    RMSprop loss
+
+MIDI:
+    All low notes are included (Limit is G3- 196 Hz)
+
