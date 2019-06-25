@@ -125,7 +125,7 @@ for trainVal in listDB:
         for method in methods:
             all_performances.append(method)
 
-        all_performances = pd.DataFrame(all_performances)
+        all_performances = pd.DataFrame(all_performances).round(2)
         print(trainVal)
         print(all_performances)
         all_performances.to_csv(bass_file, encoding='utf-8')

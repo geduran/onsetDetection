@@ -41,6 +41,10 @@ class DataManager:
             precision = 0
             f_score = 0
 
+        recall = round(recall, 2)
+        precision = round(precision, 2)
+        f_score = round(f_score, 2)
+
         print('recall {}, precision {}, f_score {}\n'.format(recall, precision, f_score))
 
         return [int(TP), int(FP), int(FN), recall,
