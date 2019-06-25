@@ -70,7 +70,7 @@ def get_labels_samples(dir):
 
 for i in ['1', '2', '3', 'all']:
 #directory = 'segmentation_files_/'
-    directory = '/home/geduran/Environments/MIDI/Train/' + i + '/'
+    directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
 
     labels, cqts, mels = get_labels_samples(directory)
 
