@@ -91,7 +91,7 @@ tensorflow_backend.set_session(session)
 
 onsetType = sys.argv[1]
 stage = sys.argv[2]
-audioPath = '../onetDetection/MIDI/Train/'+str(stage)+'/rnn'+onsetType+'Data_cqt_mel.pkl'
+audioPath = '../MIDI/Train/'+str(stage)+'/rnn'+onsetType+'Data_cqt_mel.pkl'
 
 plot_curves   = 1  # plot loss and accuracy curves
 best_model    = 'best_model_'+str(stage)+'_rnn'+onsetType+'.h5'
