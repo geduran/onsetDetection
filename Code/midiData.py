@@ -152,12 +152,12 @@ class MidiData:
         self.resolution = mf.ticksPerQuarterNote
 
 
-    def get_gt_bass(self, low_limit=196):
+    def get_gt_bass(self, low_limit=43): # G3!
         bass_gt = []
         for inst in self.instruments:
-            if ((inst.name not in self.percussive_instruments) ):# and
-              # ('Bater' not in inst.name) and ('bass' in inst.name or
-               #'Bass' in inst.name or 'bajo' in inst.name or 'Bajo' in inst.name)):
+            if ((inst.name not in self.percussive_instruments) and
+              ('Bater' not in inst.name) and ('bass' in inst.name or
+               'Bass' in inst.name or 'bajo' in inst.name or 'Bajo' in inst.name)):
                 for note in inst.notes.keys():
                     if int(note) <= low_limit:
                         for i in range(len(inst.notes[note]['start'])):
