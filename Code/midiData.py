@@ -162,8 +162,17 @@ class MidiData:
                     if int(note) <= low_limit:
                         for i in range(len(inst.notes[note]['start'])):
                             bass_gt.append(inst.notes[note]['start'][i]/(self.resolution*self.tempo)*60)
-        bass_gt = np.array(list(set(bass_gt)))
-        return np.sort(bass_gt)
+        bass_gt = np.sort(np.array(list(set(bass_gt))))
+
+        i = 0
+        min_dist = 1e-1
+        while i < len(bass_gt)-1:
+            if abs(bass_gt[i+1] - bass_gt[i]) < min_dist:
+                bass_gt.pop(i)
+                i -= 1
+            i += 1
+
+        return np.array(bass_gt)
 
     def get_gt_beat(self):
         return np.arange(0, self.max_time / self.resolution /(self.tempo/60), 60/self.tempo)
