@@ -672,6 +672,7 @@ class BassManager(DataManager):
         self.check_segmentation(audio, audio.name +'bassMulti', multipitch_segmentation)
         self.check_segmentation(audio, audio.name +'bassCNN', cnn_segmentation)
         self.check_segmentation(audio, audio.name +'bassRNN', rnn_segmentation)
+        self.check_segmentation(audio, audio.name +'bassGT', midi.gt_bass)
 
         #print('gt: {}'.format(midi.gt_bass[:25]))
         #print('RNN: {}'.format(rnn_segmentation[:25]))
@@ -763,6 +764,8 @@ class ChordManager(DataManager):
         self.check_segmentation(audio, audio.name +'chordTonnetz', harmonic_flux)
         self.check_segmentation(audio, audio.name +'chordCNN', cnn_segmentation)
         self.check_segmentation(audio, audio.name +'chordRNN', rnn_segmentation)
+        self.check_segmentation(audio, audio.name +'chordRNN', rnn_segmentation)
+
 
         try:
             self.plot_segmentation(midi, midi.gt_chord, 'gt_chord')
