@@ -3,6 +3,7 @@ from midiData import *
 from audioData import *
 import glob
 import os
+import sys
 
 
 def get_labels_samples(dir):
@@ -68,19 +69,29 @@ def get_labels_samples(dir):
 
     return all_labels, all_cqt, all_mel
 
-for i in ['1', '2', '3', 'all']:
-#directory = 'segmentation_files_/'
+if len(sys.argv) > 2:
+    i = sys.argv[1]
     directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
 
     labels, cqts, mels = get_labels_samples(directory)
 
     file = open(directory + '/cnnBassData_cqt_mel.pkl', 'wb')
-#file = open(directory + '/BassData_cqt.pkl', 'wb')
     pickle.dump((labels, cqts, mels), file)
     file.close()
-
-#print('\n\nTenemos Labels.size {} y samples.size {}'.format(labels.shape, samples.shape))
     print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
+
+else:
+    for i in ['1', '2', '3', 'all']:
+        directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
+
+        labels, cqts, mels = get_labels_samples(directory)
+
+        file = open(directory + '/cnnBassData_cqt_mel.pkl', 'wb')
+        pickle.dump((labels, cqts, mels), file)
+        file.close()
+
+    #print('\n\nTenemos Labels.size {} y samples.size {}'.format(labels.shape, samples.shape))
+        print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
 
 
 
