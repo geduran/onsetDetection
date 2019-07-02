@@ -163,7 +163,7 @@ class MidiData:
                         for i in range(len(inst.notes[note]['start'])):
                             bass_gt.append(inst.notes[note]['start'][i]/(self.resolution*self.tempo)*60)
         bass_gt = np.sort(np.array(list(set(bass_gt))))
-
+        bass_gt = list(bass_gt)
         i = 0
         min_dist = 1e-1
         while i < len(bass_gt)-1:
