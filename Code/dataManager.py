@@ -544,7 +544,7 @@ class DataManager:
 
     def bass_cnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/MIDI/Train/all/cnnBassData_cqt_mel.pkl', 'rb')
+        file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/all/cnnBassData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/RNN/1/BassData_mel.pkl'
         _,  _cqt, _mel = pickle.load(file)
         file.close()
@@ -593,7 +593,7 @@ class DataManager:
 
     def bass_rnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/MIDI/Train/all/rnnBassData_cqt_mel.pkl', 'rb')
+        file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/all/rnnBassData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/RNN/1/BassData_mel.pkl'
         _,  _cqt, _mel = pickle.load(file)
         file.close()
