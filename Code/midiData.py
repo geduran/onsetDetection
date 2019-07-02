@@ -152,7 +152,7 @@ class MidiData:
         self.resolution = mf.ticksPerQuarterNote
 
 
-    def get_gt_bass(self, low_limit=43): # G3!
+    def get_gt_bass(self, low_limit=55): # G3!
         bass_gt = []
         for inst in self.instruments:
             if ((inst.name not in self.percussive_instruments) and
