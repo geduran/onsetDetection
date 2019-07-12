@@ -139,21 +139,21 @@ class AudioData:
         feature.chord_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr)
 
 
-        librosa.display.specshow(librosa.power_to_db(feature.bass_mel_spectrogram,
-                            ref=np.max), y_axis='mel',fmax=8000, x_axis='time')
-        plt.colorbar(format='%+2.0f dB')
-        plt.title('Mel spectrogram')
-        plt.tight_layout()
-        plt.savefig('BassMel_' + self.name + '.jpg')
-        plt.clf()
-
-        librosa.display.specshow(librosa.amplitude_to_db(feature.bass_CQT, ref=np.max),
-                                sr=self.sr, x_axis='time', y_axis='cqt_note')
-        plt.colorbar(format='%+2.0f dB')
-        plt.title('Constant-Q power spectrum')
-        plt.tight_layout()
-        plt.savefig('BassCqt_' + self.name + '.jpg')
-        plt.clf()
+        # librosa.display.specshow(librosa.power_to_db(feature.bass_mel_spectrogram,
+        #                     ref=np.max), y_axis='mel',fmax=8000, x_axis='time')
+        # plt.colorbar(format='%+2.0f dB')
+        # plt.title('Mel spectrogram')
+        # plt.tight_layout()
+        # plt.savefig('BassMel_' + self.name + '.jpg')
+        # plt.clf()
+        #
+        # librosa.display.specshow(librosa.amplitude_to_db(feature.bass_CQT, ref=np.max),
+        #                         sr=self.sr, x_axis='time', y_axis='cqt_note')
+        # plt.colorbar(format='%+2.0f dB')
+        # plt.title('Constant-Q power spectrum')
+        # plt.tight_layout()
+        # plt.savefig('BassCqt_' + self.name + '.jpg')
+        # plt.clf()
 
         print('Calculando chroma a {}      '.format(self.name), end="\r")
         feature.chroma = librosa.feature.chroma_cqt(y=self.audio_h, sr=self.sr,
