@@ -1,20 +1,21 @@
-from audioData import *
-from midiData import *
-from dataManager import *
+
 import glob
 import warnings
-import pandas as pd
 import sys
-import numpy         as     np
-from   keras         import backend as K
-import tensorflow    as     tf
-from   keras.backend import tensorflow_backend
 sys.path.insert(0, '/home/geduran/Environments/onsetDetection/CNN')
 sys.path.insert(0, '/home/geduran/Environments/onsetDetection/RNN')
-from   cnn_utils     import sequentialCNN, evaluateCNN, defineCallBacks, loadPatches, loadTestPatches, loadAudioPatches
-from   cnn_utils     import evaluateLayer, plotCurves, computeConfussionMatrix, deleteWeights
-from   rnn_utils     import sequentialRNN, evaluateRNN, defineCallBacks, loadAudioPatches
-from   rnn_utils     import evaluateLayer, plotCurves, computeConfussionMatrix, deleteWeights, Metrics
+import pandas        as pd
+import numpy         as     np
+import tensorflow    as     tf
+from audioData       import *
+from   keras         import backend as K
+from   keras.backend import tensorflow_backend
+from   cnn_utils     import sequentialCNN, defineCallBacks, loadAudioPatches
+from   cnn_utils     import computeConfussionMatrix, deleteWeights
+from   rnn_utils     import sequentialRNN, defineCallBacks, loadAudioPatches
+from   rnn_utils     import computeConfussionMatrix, deleteWeights, Metrics
+from midiData        import *
+from dataManager     import *
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=RuntimeWarning)
@@ -22,8 +23,6 @@ warnings.filterwarnings(action="ignore", category=DeprecationWarning)
 
 
 # Argv[1] type of DB to be analyzed
-
-
 
 results = {}
 
@@ -57,18 +56,21 @@ else:
 for trainVal in listDB:
     for mode in listItems:
         print('Analizando mode {}'.format(mode))
-        midi_files = glob.glob('/home/geduran/Environments/onsetDetection/MIDI/'+trainVal+'/'+mode+'/*.mid')
+        midi_files = glob.glob('/home/geduran/Environments/onsetDetection/MIDI/' +
+                                trainVal+'/'+mode+'/*.mid')
 
         num_files = len(midi_files)
 
-        cnn_model_path = '/home/geduran/Environments/onsetDetection/CNN/best_model_'+mode+'_cnnBass.h5'
+        cnn_model_path = '/home/geduran/Environments/onsetDetection/CNN/best_model_' +
+                          mode+'_cnnBass.h5'
 
         cnn_model = sequentialCNN(input_shape,num_classes)
 
         cnn_model.load_weights(cnn_model_path)
 
         input_shape  = (30, 72)
-        rnn_model_path = '/home/geduran/Environments/onsetDetection/RNN/best_model_'+mode+'_rnnBass.h5'
+        rnn_model_path = '/home/geduran/Environments/onsetDetection/RNN/best_model_' +
+                          mode+'_rnnBass.h5'
         rnn_model = sequentialRNN(input_shape,num_classes,n_hidden)
         rnn_model.load_weights(rnn_model_path)
 

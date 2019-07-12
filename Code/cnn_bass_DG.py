@@ -26,11 +26,6 @@ def get_labels_samples(dir):
             new_samples[i//2, :] = (curr_cqt[i,:] + curr_cqt[i+1,:])/2
         curr_cqt = new_samples
 
-        # curr_samples = np.concatenate((curr_hfc, curr_specFlux, curr_rms,
-                    #                   curr_specCentroid, curr_specIrreg,
-                    #                   curr_specRolloff, curr_specFlat ), axis=0)
-        #print('SHAPE {}'.format(curr_samples.shape))
-        #curr_samples = curr_audio.features.bass_chroma
         print('curr_cqt S.shape {}'.format(curr_cqt.shape))
         print('curr_mel S.shape {}'.format(curr_mel.shape))
 
@@ -39,10 +34,6 @@ def get_labels_samples(dir):
         curr_hop = curr_audio.hop_len
         curr_sr = curr_audio.sr
 
-    #    print('len audio: {}\nhoplen: {}\ncantidad muestras {}'.format(len(curr_audio.audio),
-    #            curr_audio.hop_len, curr_audio.features.chroma.shape[1]))
-    #    print('gt_bass tiene size: ' + str(len(curr_midi.gt_bass)))
-    #    print('curr_labels: {}'.format(curr_labels.shape))
         for time in curr_midi.gt_bass:
             index = int(time*curr_sr/curr_hop)
             if index > len(curr_labels):
@@ -50,9 +41,7 @@ def get_labels_samples(dir):
             curr_labels[index] = 1
 
         if all_labels.any() and all_cqt.any():
-           # print('all_labels {}, curr_labels {}'.format(all_labels.shape, curr_labels.shape))
             all_labels = np.concatenate((all_labels, curr_labels), axis=0)
-            #print('all_samples {}, curr_samples {}'.format(all_samples.shape, curr_samples.T.shape))
             all_cqt = np.concatenate((all_cqt, curr_cqt.T), axis=0)
             all_mel = np.concatenate((all_mel, curr_mel.T), axis=0)
         else:
