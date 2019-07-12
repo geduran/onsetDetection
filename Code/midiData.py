@@ -1,4 +1,4 @@
-import music21
+import mido
 import random
 import scipy.io.wavfile
 import math
@@ -73,7 +73,8 @@ class MidiData:
         self.tempo = None
         self.meter = None
         self.resolution = 120
-        self.midi2song(filename)
+        self.get_instruments(filename)
+        # self.midi2song(filename)
         self.max_time = self.get_max_time()
         self.gt_bass = self.get_gt_bass()
         self.gt_beat = self.get_gt_beat()
@@ -100,77 +101,43 @@ class MidiData:
                     max_time = max(max_time, max(inst.notes[num]['start']))
         return max_time
 
-    def midi2song(self, filename):
-        mf = music21.midi.MidiFile()
-        mf.open(filename)
-        mf.read()
-        mf.close()
-        name = ''
-        tempo = None
-        for i in range(len(mf.tracks)):
+    def midifile_to_dict(self, midi_path): #將midi轉為dict
+        midi_path = mido.MidiFile(midi_path)
+        tracks = []
+        for track in midi_path.tracks:
+            tracks.append([vars(msg).copy() for msg in track])
+
+        return {
+            'ticks_per_beat': midi_path.ticks_per_beat,
+            'tracks': tracks,
+        }
+
+    def get_instruments(self, midi_path):
+        midi_data = self.midifile_to_dict(midi_path)
+        self.tempo = 6e7 / midi_data['tracks'][0][0]['tempo']
+        self.meter = (str(midi_data['tracks'][0][1]['numerator']) + '/'
+                      + str(midi_data['tracks'][0][1]['denominator']))
+        self.resolution = midi_data['ticks_per_beat'] / 4
+        for track in midi_data['tracks'][1:]:
             active = False
             notes = dict()
             for midi_note in range(21, 109):
-                notes[str(midi_note)] = dict()
-                notes[str(midi_note)]['start'] = list()
-                notes[str(midi_note)]['end'] = list()
-
-            event = mf.tracks[i].events
+                notes[midi_note] = {'start': list(), 'end': list()}
+            name = track[0]['name'].replace(' ','')
+            #print(name)
             t = 0
-            for e in event:
-                if 'SEQUENCE_TRACK_NAME' in str(e):
-                    name = str(e).split("'")[1]
-                elif 'TEXT_EVENT' in str(e):
-                    name = str(e).split("'")[1]
-                elif 'SET_TEMPO' in str(e):
-                    data = str(e).replace('=','').split('\\x')
-                    try:
-                        if(len(data) > 1):
-                            if len(data) > 3:
-                                tempo = (256**2*int(data[1][:2], 16) +
-                                        256*int(data[2][:2], 16) +
-                                        int(data[3][:2], 16))
-                            elif len(data) > 2:
-                                tempo = (256**2*int(data[1][:2], 16) +
-                                        256*int(data[2][:2], 16))
-                            else:
-                                tempo = (256**2*int(data[1][:2], 16))
-                            tempo = int((1e6)/tempo * 60)
-                    except:
-                        tempo = 0
-                    #print('tempo: ' + str(tempo))
-                elif 'TIME_SIGNATURE' in str(e):
-                    try:
-                        data = str(e).split('\\x')
-                        meter = (str(int(data[1][:2])) + '/' +
-                                str(2**int(data[2][:2])))
-                    except:
-                        meter = '4/4'
-                #    print('meter: ' + str(meter))
-
-                if e.isDeltaTime and (e.time):
-                    t += e.time
-                elif(e.isNoteOn and (e.pitch) and (e.velocity)):
-                #elif ('NOTE_ON' in str(e)) and (e.pitch):
-                    if e.pitch < 21 or e.pitch > 109:
-                        continue
-                    notes[str(e.pitch)]['start'].append(t)
-                    active = True
-                elif(e.isNoteOn and (e.pitch) and not (e.velocity)):
-                #elif ('NOTE_OFF' in str(e)) and (e.pitch):
-                    if e.pitch < 21 or e.pitch > 109:
-                        continue
-                    notes[str(e.pitch)]['end'].append(t)
-
-
-            name = name.replace(' ','')
-            if (active): #and (name not in self.percussive_instruments) and ('Bater' not in name):
+            for event in track:
+                if 'note' in event.keys():
+                    t += event['time']
+                    note = event['note']
+                    #print(note)
+                    if 'note_on' in event['type']:
+                        active = True
+                        notes[note]['start'].append(t/4)
+                    elif 'note_off' in event['type']:
+                        notes[note]['end'].append(t/4)
+            if active:
                 self.add_instrument(Instrument(name=name, notes=notes))
-        if not tempo:
-            tempo = 1
-        self.meter = meter
-        self.tempo = tempo
-        self.resolution = mf.ticksPerQuarterNote
 
 
     def get_gt_bass(self, low_limit=55): # G3!
