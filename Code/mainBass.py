@@ -61,16 +61,16 @@ for trainVal in listDB:
 
         num_files = len(midi_files)
 
-        cnn_model_path = '/home/geduran/Environments/onsetDetection/CNN/best_model_' +
-                          mode+'_cnnBass.h5'
+        cnn_model_path = ('/home/geduran/Environments/onsetDetection/CNN/best_model_' +
+                          mode+'_cnnBass.h5')
 
         cnn_model = sequentialCNN(input_shape,num_classes)
 
         cnn_model.load_weights(cnn_model_path)
 
         input_shape  = (30, 72)
-        rnn_model_path = '/home/geduran/Environments/onsetDetection/RNN/best_model_' +
-                          mode+'_rnnBass.h5'
+        rnn_model_path = ('/home/geduran/Environments/onsetDetection/RNN/best_model_' +
+                          mode+'_rnnBass.h5')
         rnn_model = sequentialRNN(input_shape,num_classes,n_hidden)
         rnn_model.load_weights(rnn_model_path)
 
@@ -95,9 +95,11 @@ for trainVal in listDB:
         pd_results = pd_results.T
 
         if HPSS:
-            bass_file = '/home/geduran/Environments/onsetDetection/Performances/BassSegmentation_HPSS'+trainVal+mode+'.csv'
+            bass_file = ('/home/geduran/Environments/onsetDetection/Perfor' +
+                         'mances/BassSegmentation_HPSS'+trainVal+mode+'.csv')
         else:
-            bass_file = '/home/geduran/Environments/onsetDetection/Performances/BassSegmentation'+trainVal+mode+'.csv'
+            bass_file = ('/home/geduran/Environments/onsetDetection/Perfor' +
+                         'mances/BassSegmentation'+trainVal+mode+'.csv')
 
         all_performances = pd_results
 
