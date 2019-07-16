@@ -70,7 +70,7 @@ if len(sys.argv) > 2:
     print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
 
 else:
-    for i in ['1', '2', '3', 'all']:
+    for i in ['1', 'all']:
         directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
 
         labels, cqts, mels = get_labels_samples(directory)
