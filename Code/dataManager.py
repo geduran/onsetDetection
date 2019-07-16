@@ -10,7 +10,7 @@ class DataManager:
     Class with no attributes. It deals woth pre-computed data and performs
     onset detection, gets performances and plots results.
     """
-    def get_performance(self, ground_truth, detected, tolerance=10e-2):
+    def get_performance(self, ground_truth, detected, tolerance=5e-2):
 
         TP = 0
         FP = 0

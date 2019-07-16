@@ -50,7 +50,15 @@ class MidiData:
                                        'Rhythm', 'OpenHiHat', 'ClosedHiHat',
                                        'TightSnare', 'Std.DrumSet', 'DRUMS',
                                        'Drums2', 'RhythmTrack', 'Sandblock',
-                                       'PercussionStdDrums']
+                                       'PercussionStdDrums', '',
+                                       'StandardKit', 'bateria', 'Bateria',
+                                       'HiRideCymbal', 'BrushDrumKit',
+                                       '*DrumSetandPercussion(Devian/Chris)',
+                                       'Drum1', 'DrumSet', 'REV.CYMBL',
+                                       'fill', 'Drums1', 'Drums2', 'Drums3',
+                                       'Drums4', 'Drums5', 'Drums6', 'Drums7',
+                                       'Drums(BB)', 'dr', 'LoRideCymbal',
+                                       ]
 
 
         self.colors = np.array([[255,0,0], [0,155,0], [0,0,255], [0,255,255],
@@ -121,10 +129,9 @@ class MidiData:
         for track in midi_data['tracks'][1:]:
             active = False
             notes = dict()
-            for midi_note in range(21, 109):
+            for midi_note in range(1, 130):
                 notes[midi_note] = {'start': list(), 'end': list()}
-            name = track[0]['name'].replace(' ','')
-            #print(name)
+            name = track[0]['name'].replace(' ','').replace('í', 'i')
             t = 0
             for event in track:
                 if 'note' in event.keys():
@@ -137,6 +144,8 @@ class MidiData:
                     elif 'note_off' in event['type']:
                         notes[note]['end'].append(t/4)
             if active:
+                # if (name not in self.percussive_instruments):
+                #     print('name: {}'.format(name))
                 self.add_instrument(Instrument(name=name, notes=notes))
 
 
