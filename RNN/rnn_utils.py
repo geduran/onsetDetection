@@ -92,13 +92,12 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
     #Start Neural Network
     model = Sequential()
 
-  #  model.add(Bidirectional(RNN_type(n_hidden, return_sequences=False),
-   #                         input_shape=input_shape))
+   model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True),
+                           input_shape=input_shape))
 
-    model.add(RNN_type(n_hidden, input_shape=input_shape,
-                                   return_sequences=True))
+    model.add(Bidirectional(RNN_type(n_hidden, return_sequences=False)))
 
-    model.add(RNN_type(n_hidden, return_sequences=False))
+    # model.add(RNN_type(n_hidden, return_sequences=False))
     model.add(Dropout(0.25))
 
     #Fully connected final layer
@@ -112,7 +111,6 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
     model.summary()
 
     return model
-
 
 
 def deleteWeights(best_model,last_model):
@@ -147,26 +145,24 @@ def defineCallBacks(model_file):
 
 def loadAudioPatches(st_file):
     file = open(st_file, 'rb')
-    labels, cqt, mel = pickle.load(file)
+    labels, mel1, mel2, mel3 = pickle.load(file)
     file.close()
 
-    mx_mel = np.max(mel)
-    mn_mel = np.min(mel)
-    mel = (mel-mn_mel) / (mx_mel-mn_mel)
+    mx_mel1 = np.max(mel1)
+    mn_mel1 = np.min(mel1)
+    mel1 = (mel1-mn_mel1) / (mx_mel1-mn_mel1)
 
-    new_samples = np.zeros((mel.shape[0], cqt.shape[1]))
-    for i in np.arange(0, mel.shape[0]-1, 2):
-        new_samples[i//2, :] = (cqt[i,:] + cqt[i+1,:])/2
-    cqt = new_samples
+    mx_mel2 = np.max(mel2)
+    mn_mel2 = np.min(mel2)
+    mel2 = (mel2-mn_mel2) / (mx_mel2-mn_mel2)
 
-    mx_cqt = np.max(cqt)
-    mn_cqt = np.min(cqt)
-    cqt = (cqt-mn_cqt) / (mx_cqt-mn_cqt)
-
+    mx_mel3 = np.max(mel3)
+    mn_mel3 = np.min(mel3)
+    mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
     seq_len = 30
 
-    samples = np.concatenate((mel, cqt), axis=1)
+    samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
 
     print('samples.shape {}'.format(samples.shape))

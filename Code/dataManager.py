@@ -657,33 +657,34 @@ class DataManager:
                     'all/rnnBassData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/' +
                 # 'RNN/1/BassData_mel.pkl'
-        _,  _cqt, _mel = pickle.load(file)
+        labels, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
+
+        mel1 = audio_data.features.bass_mel_spectrogram1
+        mel2 = audio_data.features.bass_mel_spectrogram2
+        mel3 = audio_data.features.bass_mel_spectrogram3
+
+        mx_mel1 = np.max(_mel1)
+        mn_mel1 = np.min(_mel1)
+        mel1 = (_mel1-mn_mel1) / (mx_mel1-mn_mel1)
+
+        mx_mel2 = np.max(_mel2)
+        mn_mel2 = np.min(_mel2)
+        mel2 = (_mel2-mn_mel2) / (mx_mel2-mn_mel2)
+
+        mx_mel3 = np.max(_mel3)
+        mn_mel3 = np.min(_mel3)
+        mel3 = (_mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
         seq_len = 30
 
-        mel = audio_data.features.bass_mel_spectrogram
-        cqt = audio_data.features.bass_CQT
+        mel1 = mel1.T
+        mel2 = mel2.T
+        mel3 = mel3.T
 
-        mx_mel = np.max(_mel)
-        mn_mel = np.min(_mel)
-        mel = (mel-mn_mel) / (mx_mel-mn_mel)
+        curr_samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
-    #    new_samples = np.zeros((mel.shape[0], cqt.shape[1]))
-    #    for i in np.arange(0, mel.shape[0]-1, 2):
-    #        new_samples[i//2, :] = (cqt[i,:] + cqt[i+1,:])/2
-    #    cqt = new_samples
-
-        mx_cqt = np.max(_cqt)
-        mn_cqt = np.min(_cqt)
-        cqt = (cqt-mn_cqt) / (mx_cqt-mn_cqt)
-
-        mel = mel.T
-        cqt = cqt.T
-
-        curr_samples = np.concatenate((mel, cqt), axis=1)
-
-        n_samples = cqt.shape[0]
+        n_samples = mel1.shape[0]
         n_features = curr_samples.shape[1]
 
         evaluate_samples = np.zeros((n_samples-seq_len, seq_len, n_features))

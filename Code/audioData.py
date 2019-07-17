@@ -6,6 +6,8 @@ import librosa.display
 import collections
 import pickle
 import os
+import madmom
+from madmom.audio.filters   import MelFilterbank
 import numpy                as np
 import matplotlib.pyplot    as plt
 import sklearn.cluster      as skl
@@ -130,13 +132,35 @@ class AudioData:
                                    hop_length=hop_len, n_bins=128,
                                    bins_per_octave=24))
 
-        feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
-                                                                 fmax=600, n_mels=24, htk=False)
+        audioFrame = madmom.audio.signal.FramedSignal(self.audio,
+                                                      frame_size=self.win_len,
+                                                      hop_size=self.hop_len,
+                                                      sample_rate=self.sr)
+        feature.bass_mel_spectrogram1 = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=120)
+
+        audioFrame = madmom.audio.signal.FramedSignal(self.audio,
+                                                      frame_size=self.win_len/2,
+                                                      hop_size=self.hop_len,
+                                                      sample_rate=self.sr)
+        feature.bass_mel_spectrogram2 = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=120)
+                                        
+        audioFrame = madmom.audio.signal.FramedSignal(self.audio,
+                                                      frame_size=self.win_len/4,
+                                                      hop_size=self.hop_len,
+                                                      sample_rate=self.sr)
+        feature.bass_mel_spectrogram3 = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=120)
+
+
+        # feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
+        #                                                          fmax=600, n_mels=24, htk=False)
 
         feature.bass_mel_spectrogram_cnn = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
                                                                  fmax=2000, n_mels=48, htk=False)
 
-        feature.chord_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr)
+        # feature.chord_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr)
 
 
         # librosa.display.specshow(librosa.power_to_db(feature.bass_mel_spectrogram,
