@@ -662,10 +662,6 @@ class DataManager:
 
         seq_len = 30
 
-
-
-
-  
         mel = audio_data.features.bass_mel_spectrogram
         cqt = audio_data.features.bass_CQT
 
