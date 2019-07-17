@@ -1,0 +1,5 @@
+,TP,FP,FN,recall,precision,f_score
+chroma_bass_TOTAL,1276.0,120.0,266.0,0.83,0.91,0.87
+cnn_bass_TOTAL,1514.0,309.0,28.0,0.98,0.83,0.9
+multi_bass_TOTAL,1096.0,221.0,446.0,0.71,0.83,0.77
+rnn_bass_TOTAL,1336.0,429.0,206.0,0.87,0.76,0.81
