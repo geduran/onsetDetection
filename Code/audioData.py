@@ -161,7 +161,6 @@ class AudioData:
                                         filterbank=MelFilterbank, num_bands=40,
                                         fmin=40, fmax=1000)
 
-
         feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
                                                                  fmax=600, n_mels=24, htk=False)
 
