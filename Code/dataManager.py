@@ -654,7 +654,7 @@ class DataManager:
     def bass_rnn_segmentation(self, audio_data, model):
 
         file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/' +
-                    'all/rnnBassData_cqt_mel.pkl', 'rb')
+                    '1/rnnBassData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/' +
                 # 'RNN/1/BassData_mel.pkl'
         labels, _mel1, _mel2, _mel3 = pickle.load(file)
