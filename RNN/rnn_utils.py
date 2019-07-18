@@ -162,8 +162,8 @@ def loadAudioPatches(st_file):
 
     seq_len = 10
 
+    print('mel1.shape {}, mel2.shape {}, mel3.shape {}'.format(mel1.shape, mel2.shape, mel3.shape))
     samples = np.concatenate((mel1, mel2, mel3), axis=1)
-
 
     print('samples.shape {}'.format(samples.shape))
 
