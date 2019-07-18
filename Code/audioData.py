@@ -132,20 +132,21 @@ class AudioData:
                                    hop_length=hop_len, n_bins=128,
                                    bins_per_octave=24))
 
+        print('Efectuando mel1 a {}      '.format(self.name), end="\r")
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len,
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
         feature.bass_mel_spectrogram1 = madmom.audio.FilteredSpectrogram(audioFrame,
                                         filterbank=MelFilterbank, num_bands=120)
-
+        print('Efectuando mel2 a {}      '.format(self.name), end="\r")
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len/2,
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
         feature.bass_mel_spectrogram2 = madmom.audio.FilteredSpectrogram(audioFrame,
                                         filterbank=MelFilterbank, num_bands=120)
-                                        
+        print('Efectuando mel3 a {}      '.format(self.name), end="\r")
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len/4,
                                                       hop_size=self.hop_len,
