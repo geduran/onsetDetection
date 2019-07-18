@@ -42,6 +42,10 @@ class Features:
         self.chord_CQT = None
         self.bass_mel_spectrogram = None
         self.chord_mel_spectrogram = None
+        self.bass_mel_spectrogram1 = None
+        self.bass_mel_spectrogram2 = None
+        self.bass_mel_spectrogram3 = None
+
 
 class AudioData:
     """

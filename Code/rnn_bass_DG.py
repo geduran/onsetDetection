@@ -25,7 +25,7 @@ def get_labels_samples(dir):
 
 ###########################################################
         # curr_cqt = curr_audio.features.bass_CQT
-        print('curr_cqt S.shape {}'.format(curr_cqt.shape))
+        # print('curr_cqt S.shape {}'.format(curr_cqt.shape))
         curr_mel1 = curr_audio.features.bass_mel_spectrogram1
         curr_mel2 = curr_audio.features.bass_mel_spectrogram2
         curr_mel3 = curr_audio.features.bass_mel_spectrogram3
