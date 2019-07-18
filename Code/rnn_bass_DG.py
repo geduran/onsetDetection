@@ -33,7 +33,7 @@ def get_labels_samples(dir):
 
 
         # print('curr_cqt S.shape {}'.format(curr_cqt.shape))
-        print('curr_mel S.shape {}'.format(curr_mel1.shape))
+        # print('curr_mel S.shape {}'.format(curr_mel1.shape))
 
         curr_labels = np.zeros((curr_mel1.shape[1], 1), dtype=int)
 
@@ -48,7 +48,7 @@ def get_labels_samples(dir):
 
         if (all_labels.any() and all_mel1.any() and all_mel2.any() and
             all_mel3.any()):
-            print('allmel1.shape {}, allmel2.shape {}, allmel3.shape {}'.format(allmel1.shape,allmel2.shape,allmel3.shape))
+            print('allmel1.shape {}, allmel2.shape {}, allmel3.shape {}'.format(all_mel1.shape,all_mel2.shape,all_mel3.shape))
             print('curr_mel1.shape {}, curr_mel2.shape {}, curr_mel3.shape {}'.format(curr_mel1.shape,curr_mel2.shape,curr_mel3.shape))
             all_labels = np.concatenate((all_labels, curr_labels), axis=0)
             all_mel1 = np.concatenate((all_mel1, curr_mel1), axis=0)
@@ -72,7 +72,7 @@ if len(sys.argv) > 2:
     file = open(directory + '/rnnBassData_cqt_mel.pkl', 'wb')
     pickle.dump((labels, mels1, mels2, mels3), file)
     file.close()
-    print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
+    print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, mels1.shape))
 
 else:
     for i in ['1', 'all']:
@@ -82,7 +82,7 @@ else:
         file = open(directory + '/rnnBassData_cqt_mel.pkl', 'wb')
         pickle.dump((labels, mels1, mels2, mels3), file)
         file.close()
-        print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
+        print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, mels1.shape))
 
 
 
