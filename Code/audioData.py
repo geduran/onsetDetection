@@ -162,8 +162,8 @@ class AudioData:
                                         fmin=40, fmax=1000)
 
 
-        # feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
-        #                                                          fmax=600, n_mels=24, htk=False)
+        feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
+                                                                 fmax=600, n_mels=24, htk=False)
 
         feature.bass_mel_spectrogram_cnn = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
                                                                  fmax=2000, n_mels=48, htk=False)
