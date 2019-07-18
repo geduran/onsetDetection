@@ -655,9 +655,8 @@ class DataManager:
 
         file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/' +
                     '1/rnnBassData_cqt_mel.pkl', 'rb')
-        #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/' +
-                # 'RNN/1/BassData_mel.pkl'
-        labels, _mel1, _mel2, _mel3 = pickle.load(file)
+
+        _, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
 
         mel1 = audio_data.features.bass_mel_spectrogram1
@@ -697,13 +696,13 @@ class DataManager:
         peaks, _ = scipy.signal.find_peaks(predictions[:,1], height=0.5,
                                            distance=20)
 
-        # plt.clf()
-        # predictions_ = predictions[2000:5000,1]
-        # plt.plot(predictions_)
-        # peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.85, distance=40)
-        # plt.plot(peaks_, predictions_[peaks_], 'x')
-        # plt.savefig(audio_data.name + '_bassRnn.eps', format='eps', dpi=100)
-        # plt.clf()
+        plt.clf()
+        predictions_ = predictions[2000:5000,1]
+        plt.plot(predictions_)
+        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.5, distance=20)
+        plt.plot(peaks_, predictions_[peaks_], 'x')
+        plt.savefig(audio_data.name + '_bassRnn.eps', format='eps', dpi=100)
+        plt.clf()
 
         #peaks += int(seq_len/2)
 

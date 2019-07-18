@@ -48,8 +48,8 @@ def get_labels_samples(dir):
 
         if (all_labels.any() and all_mel1.any() and all_mel2.any() and
             all_mel3.any()):
-            print('allmel1.shape {}, allmel2.shape {}, allmel3.shape {}'.format(all_mel1.shape,all_mel2.shape,all_mel3.shape))
-            print('curr_mel1.shape {}, curr_mel2.shape {}, curr_mel3.shape {}'.format(curr_mel1.shape,curr_mel2.shape,curr_mel3.shape))
+            # print('allmel1.shape {}, allmel2.shape {}, allmel3.shape {}'.format(all_mel1.shape,all_mel2.shape,all_mel3.shape))
+            # print('curr_mel1.shape {}, curr_mel2.shape {}, curr_mel3.shape {}'.format(curr_mel1.shape,curr_mel2.shape,curr_mel3.shape))
             all_labels = np.concatenate((all_labels, curr_labels), axis=0)
             all_mel1 = np.concatenate((all_mel1, curr_mel1), axis=0)
             all_mel2 = np.concatenate((all_mel2, curr_mel2), axis=0)
