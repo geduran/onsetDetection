@@ -82,7 +82,8 @@ for trainVal in listDB:
                 break
             midi_path = midi_files[i]
             midi = MidiData(midi_path)
-            audio = AudioData(midi_path[:-3]+'wav', win_len=1024, hop_len=128, HPSS=False, only_bass=False)
+            audio = AudioData(midi_path[:-3]+'wav', win_len=4096, hop_len=512,
+                              HPSS=False, only_bass=False)
 
             _chroma, _multi, _cnn, _rnn = BM.segment_bass(audio, midi, cnn_model, rnn_model, HPSS)
             results['chroma_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _chroma)
