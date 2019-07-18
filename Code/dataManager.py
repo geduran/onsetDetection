@@ -678,10 +678,6 @@ class DataManager:
 
         seq_len = 10
 
-        mel1 = mel1.T
-        mel2 = mel2.T
-        mel3 = mel3.T
-
         curr_samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
         n_samples = mel1.shape[0]
