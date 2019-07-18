@@ -653,27 +653,27 @@ class DataManager:
 
     def bass_rnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/' +
-                    '1/rnnBassData_cqt_mel.pkl', 'rb')
-
-        _, _mel1, _mel2, _mel3 = pickle.load(file)
-        file.close()
+        # file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/' +
+        #             '1/rnnBassData_cqt_mel.pkl', 'rb')
+        #
+        # _, _mel1, _mel2, _mel3 = pickle.load(file)
+        # file.close()
 
         mel1 = audio_data.features.bass_mel_spectrogram1
         mel2 = audio_data.features.bass_mel_spectrogram2
         mel3 = audio_data.features.bass_mel_spectrogram3
 
-        mx_mel1 = np.max(_mel1)
-        mn_mel1 = np.min(_mel1)
-        mel1 = (_mel1-mn_mel1) / (mx_mel1-mn_mel1)
-
-        mx_mel2 = np.max(_mel2)
-        mn_mel2 = np.min(_mel2)
-        mel2 = (_mel2-mn_mel2) / (mx_mel2-mn_mel2)
-
-        mx_mel3 = np.max(_mel3)
-        mn_mel3 = np.min(_mel3)
-        mel3 = (_mel3-mn_mel3) / (mx_mel3-mn_mel3)
+        # mx_mel1 = np.max(_mel1)
+        # mn_mel1 = np.min(_mel1)
+        # mel1 = (_mel1-mn_mel1) / (mx_mel1-mn_mel1)
+        #
+        # mx_mel2 = np.max(_mel2)
+        # mn_mel2 = np.min(_mel2)
+        # mel2 = (_mel2-mn_mel2) / (mx_mel2-mn_mel2)
+        #
+        # mx_mel3 = np.max(_mel3)
+        # mn_mel3 = np.min(_mel3)
+        # mel3 = (_mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
         seq_len = 10
 
