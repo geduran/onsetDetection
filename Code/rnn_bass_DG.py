@@ -38,7 +38,7 @@ def get_labels_samples(dir):
 
 
         # print('curr_cqt S.shape {}'.format(curr_cqt.shape))
-        print('curr_mel S.shape {}'.format(curr_mel.shape))
+        print('curr_mel S.shape {}'.format(curr_mel1.shape))
 
         curr_labels = np.zeros((curr_mel1.shape[1], 1), dtype=int)
 
