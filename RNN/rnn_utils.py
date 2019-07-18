@@ -97,8 +97,8 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
     #
     # model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True)))
 
-    model.add(RNN_type(n_hidden, return_sequences=True),
-              input_shape=input_shape)
+    model.add(RNN_type(n_hidden, return_sequences=True,
+              input_shape=input_shape))
     model.add(RNN_type(n_hidden, return_sequences=False))
 
     model.add(Dropout(0.25))
