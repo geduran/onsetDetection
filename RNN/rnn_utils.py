@@ -160,7 +160,7 @@ def loadAudioPatches(st_file):
     mn_mel3 = np.min(mel3)
     mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
-    seq_len = 30
+    seq_len = 10
 
     samples = np.concatenate((mel1, mel2, mel3), axis=1)
 

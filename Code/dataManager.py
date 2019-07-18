@@ -676,7 +676,7 @@ class DataManager:
         mn_mel3 = np.min(_mel3)
         mel3 = (_mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
-        seq_len = 30
+        seq_len = 10
 
         mel1 = mel1.T
         mel2 = mel2.T
