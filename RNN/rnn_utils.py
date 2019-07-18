@@ -92,8 +92,8 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
     #Start Neural Network
     model = Sequential()
 
-   model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True),
-                           input_shape=input_shape))
+    model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True),
+                            input_shape=input_shape))
 
     model.add(Bidirectional(RNN_type(n_hidden, return_sequences=False)))
 
