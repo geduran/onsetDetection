@@ -142,21 +142,24 @@ class AudioData:
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
         feature.bass_mel_spectrogram1 = madmom.audio.FilteredSpectrogram(audioFrame,
-                                        filterbank=MelFilterbank, num_bands=120)
+                                        filterbank=MelFilterbank, num_bands=40,
+                                        fmin=40, fmax=1000)
         print('Efectuando mel2 a {}      '.format(self.name), end="\r")
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len/2,
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
         feature.bass_mel_spectrogram2 = madmom.audio.FilteredSpectrogram(audioFrame,
-                                        filterbank=MelFilterbank, num_bands=120)
+                                        filterbank=MelFilterbank, num_bands=40,
+                                        fmin=40, fmax=1000)
         print('Efectuando mel3 a {}      '.format(self.name), end="\r")
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len/4,
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
         feature.bass_mel_spectrogram3 = madmom.audio.FilteredSpectrogram(audioFrame,
-                                        filterbank=MelFilterbank, num_bands=120)
+                                        filterbank=MelFilterbank, num_bands=40,
+                                        fmin=40, fmax=1000)
 
 
         # feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
