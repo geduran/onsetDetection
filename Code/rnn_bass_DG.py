@@ -43,7 +43,7 @@ def get_labels_samples(dir):
         for time in curr_midi.gt_bass:
             index = int(time*curr_sr/curr_hop)
             if index > len(curr_labels):
-                break
+                continue
             curr_labels[index] = 1
 
         if (all_labels.any() and all_mel1.any() and all_mel2.any() and
