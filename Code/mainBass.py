@@ -68,7 +68,7 @@ for trainVal in listDB:
 
         cnn_model.load_weights(cnn_model_path)
 
-        input_shape  = (30, 72)
+        input_shape  = (10, 98)
         rnn_model_path = ('/home/geduran/Environments/onsetDetection/RNN/best_model_' +
                           mode+'_rnnBass.h5')
         rnn_model = sequentialRNN(input_shape,num_classes,n_hidden)
