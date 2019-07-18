@@ -151,17 +151,17 @@ def loadAudioPatches(st_file):
     labels, mel1, mel2, mel3 = pickle.load(file)
     file.close()
 
-    # mx_mel1 = np.max(mel1)
-    # mn_mel1 = np.min(mel1)
-    # mel1 = (mel1-mn_mel1) / (mx_mel1-mn_mel1)
-    #
-    # mx_mel2 = np.max(mel2)
-    # mn_mel2 = np.min(mel2)
-    # mel2 = (mel2-mn_mel2) / (mx_mel2-mn_mel2)
-    #
-    # mx_mel3 = np.max(mel3)
-    # mn_mel3 = np.min(mel3)
-    # mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
+    mx_mel1 = np.max(mel1)
+    mn_mel1 = np.min(mel1)
+    mel1 = (mel1-mn_mel1) / (mx_mel1-mn_mel1)
+
+    mx_mel2 = np.max(mel2)
+    mn_mel2 = np.min(mel2)
+    mel2 = (mel2-mn_mel2) / (mx_mel2-mn_mel2)
+
+    mx_mel3 = np.max(mel3)
+    mn_mel3 = np.min(mel3)
+    mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
     seq_len = 10
 
