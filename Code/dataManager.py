@@ -687,13 +687,11 @@ class DataManager:
         b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
                                     output='ba')
         detect_function = scipy.signal.lfilter(b, a, predictions[0,:,1])
-        print('predictions.shape {}, detect_function.shape {}'.format(predictions.shape, detect_function.shape))
-        print('detect_function.shape {}'.format(detect_function.shape))
         peaks, _ = scipy.signal.find_peaks(detect_function, height=0.5,
                                            distance=20)
 
         plt.clf()
-        predictions_ = predictions[2000:5000,1]
+        predictions_ = predictions[0, 2000:5000,1]
         plt.plot(predictions_)
         peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.5, distance=20)
         plt.plot(peaks_, predictions_[peaks_], 'x')
