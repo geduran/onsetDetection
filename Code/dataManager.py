@@ -688,7 +688,6 @@ class DataManager:
                                     output='ba')
         detect_function = scipy.signal.lfilter(b, a, predictions[0,:,1])
         print('predictions.shape {}, detect_function.shape {}'.format(predictions.shape, detect_function.shape))
-        detect_function = detect_function.reshape((1,detect_function.shape[0]))
         print('detect_function.shape {}'.format(detect_function.shape))
         peaks, _ = scipy.signal.find_peaks(detect_function, height=0.5,
                                            distance=20)
