@@ -160,11 +160,13 @@ def loadAudioPatches(st_file):
 
     print('samples.shape {}'.format(samples.shape))
 
+
+    ind = np.arange(0, samples.shape[0] - seq_len, int(seq_len/4))
     n_samples = samples.shape[0] - seq_len
     n_features = samples.shape[1]
-    ind = set()
-    while len(ind) < n_samples:
-        ind.add(random.randint(0, samples.shape[0]-seq_len-1))
+    # ind = set()
+    # while len(ind) < n_samples:
+    #     ind.add(random.randint(0, samples.shape[0]-seq_len-1))
 
     X_train = np.zeros((n_samples, seq_len, n_features))
     Y_train = np.zeros((n_samples, seq_len, 2))
