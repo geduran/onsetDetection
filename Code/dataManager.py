@@ -498,8 +498,7 @@ class DataManager:
 
     def chord_cnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/MIDI/Train/all/' +
-                    'cnnChordData_cqt_mel.pkl', 'rb')
+        file = open('../MIDI/Train/all/' + 'cnnChordData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/RNN/1/BassData_mel.pkl'
         _,  _cqt, _mel = pickle.load(file)
         file.close()
@@ -547,8 +546,7 @@ class DataManager:
 
     def chord_rnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/MIDI/Train/all/' +
-                    'rnnChordData_cqt_mel.pkl', 'rb')
+        file = open('../MIDI/Train/all/' + 'rnnChordData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/codigos/RNN/1/BassData_mel.pkl'
         _,  _cqt, _mel = pickle.load(file)
         file.close()
@@ -597,8 +595,7 @@ class DataManager:
 
     def bass_cnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/' +
-                    'all/cnnBassData_cqt_mel.pkl', 'rb')
+        file = open('../MIDI/Train/' + 'all/cnnBassData_cqt_mel.pkl', 'rb')
         #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/' +
                 # 'codigos/RNN/1/BassData_mel.pkl'
         _,  _cqt, _mel = pickle.load(file)
@@ -653,8 +650,7 @@ class DataManager:
 
     def bass_rnn_segmentation(self, audio_data, model):
 
-        file = open('/home/geduran/Environments/onsetDetection/MIDI/Train/' +
-                    '1/rnnBassData_cqt_mel.pkl', 'rb')
+        file = open('../MIDI/Train/' + '1/rnnBassData_cqt_mel.pkl', 'rb')
 
         _, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
@@ -675,25 +671,21 @@ class DataManager:
         mn_mel3 = np.min(_mel3)
         mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
-        seq_len = 10
+        seq_len = 200
 
         curr_samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
         n_samples = mel1.shape[0]
         n_features = curr_samples.shape[1]
 
-        evaluate_samples = np.zeros((n_samples-seq_len, seq_len, n_features))
-        for i in range(n_samples-seq_len):
-            evaluate_samples[i,:,:] = curr_samples[i:i+seq_len,:]
-
-        predictions = model.predict(evaluate_samples, batch_size=1024,
-                                    verbose=0)
+        predictions = model.predict(curr_samples, batch_size=1024,
+                                    verbose=1)
 
         #predictions = predictions[2000:5000,:]
-        #b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
-                                    # output='ba')
-        #detect_function = scipy.signal.lfilter(b, a, predictions[:,1])
-        peaks, _ = scipy.signal.find_peaks(predictions[:,1], height=0.5,
+        b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
+                                    output='ba')
+        detect_function = scipy.signal.lfilter(b, a, predictions[:,1])
+        peaks, _ = scipy.signal.find_peaks(detect_function, height=0.5,
                                            distance=20)
 
         plt.clf()
@@ -703,8 +695,6 @@ class DataManager:
         plt.plot(peaks_, predictions_[peaks_], 'x')
         plt.savefig(audio_data.name + '_bassRnn.eps', format='eps', dpi=100)
         plt.clf()
-
-        #peaks += int(seq_len/2)
 
         return (peaks * audio_data.hop_len +
                           audio_data.win_len/audio_data.hop_len)/audio_data.sr
@@ -791,7 +781,7 @@ class BassManager(DataManager):
         suma = np.clip(audio_data.get_data_flux(C_new, dist=2), 0, None)**2
         suma = audio_data.norm_data(suma, norm_type=1)
 
-        thr = 0.005 * np.max(suma)
+        thr = 0.01 * np.max(suma)
         pos, _ = scipy.signal.find_peaks(suma, distance=1, height=thr)
         #plt.clf()
         #tt = np.linspace(0, 10, len(suma[:int(10/hop_len*audio_data.sr)]))

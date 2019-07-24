@@ -2,8 +2,8 @@
 import glob
 import warnings
 import sys
-sys.path.insert(0, '/home/geduran/Environments/onsetDetection/CNN')
-sys.path.insert(0, '/home/geduran/Environments/onsetDetection/RNN')
+sys.path.insert(0, '../CNN')
+sys.path.insert(0, '../RNN')
 import pandas        as pd
 import numpy         as     np
 import tensorflow    as     tf
@@ -56,12 +56,11 @@ else:
 for trainVal in listDB:
     for mode in listItems:
         print('Analizando mode {}'.format(mode))
-        midi_files = glob.glob('/home/geduran/Environments/onsetDetection/MIDI/' +
-                                trainVal+'/'+mode+'/*.mid')
+        midi_files = glob.glob('../MIDI/' + trainVal+'/'+mode+'/*.mid')
 
         num_files = len(midi_files)
 
-        cnn_model_path = ('/home/geduran/Environments/onsetDetection/CNN/best_model_' +
+        cnn_model_path = ('../CNN/best_model_' +
                           mode+'_cnnBass.h5')
 
         cnn_model = sequentialCNN(input_shape,num_classes)
@@ -69,8 +68,7 @@ for trainVal in listDB:
         cnn_model.load_weights(cnn_model_path)
 
         input_shape  = (10, 98)
-        rnn_model_path = ('/home/geduran/Environments/onsetDetection/RNN/best_model_' +
-                          mode+'_rnnBass.h5')
+        rnn_model_path = ('../RNN/best_model_' + mode+'_rnnBass.h5')
         rnn_model = sequentialRNN(input_shape,num_classes,n_hidden)
         rnn_model.load_weights(rnn_model_path)
 
@@ -96,11 +94,11 @@ for trainVal in listDB:
         pd_results = pd_results.T
 
         if HPSS:
-            bass_file = ('/home/geduran/Environments/onsetDetection/Perfor' +
-                         'mances/BassSegmentation_HPSS'+trainVal+mode+'.csv')
+            bass_file = ('../Performances/BassSegmentation_HPSS' +
+                         trainVal + mode+'.csv')
         else:
-            bass_file = ('/home/geduran/Environments/onsetDetection/Perfor' +
-                         'mances/BassSegmentation'+trainVal+mode+'.csv')
+            bass_file = ('../Performances/BassSegmentation' + trainVal +
+                         mode + '.csv')
 
         all_performances = pd_results
 
