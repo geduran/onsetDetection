@@ -65,7 +65,7 @@ for trainVal in listDB:
 
         cnn_model.load_weights(cnn_model_path)
 
-        input_shape  = (10, 98)
+        input_shape  = (None, 98)
         rnn_model_path = ('../RNN/best_model_' + mode+'_rnnBass.h5')
         rnn_model = sequentialRNN(input_shape,num_classes,n_hidden)
         rnn_model.load_weights(rnn_model_path)
@@ -78,7 +78,7 @@ for trainVal in listDB:
                 break
             midi_path = midi_files[i]
             midi = MidiData(midi_path)
-            audio = AudioData(midi_path[:-3]+'wav', win_len=4096, hop_len=512,
+            audio = AudioData(midi_path[:-3]+'wav', win_len=4096, hop_len=256,
                               HPSS=False, only_bass=False)
 
             _chroma, _multi, _cnn, _rnn = BM.segment_bass(audio, midi, cnn_model, rnn_model, HPSS)
