@@ -162,7 +162,7 @@ def loadAudioPatches(st_file):
 
 
     ind = np.arange(0, samples.shape[0] - seq_len, int(seq_len/4))
-    n_samples = samples.shape[0] - seq_len
+    n_samples = len(ind)
     n_features = samples.shape[1]
     # ind = set()
     # while len(ind) < n_samples:
