@@ -15,7 +15,7 @@ def get_labels_samples(dir):
 
     for file in files:
         curr_midi = MidiData(file)
-        curr_audio = AudioData(file[:-4]+'.wav', win_len=4096, hop_len=512,
+        curr_audio = AudioData(file[:-4]+'.wav', win_len=4096, hop_len=256,
                                HPSS=False, only_bass=False)
 
 ###########################################################
@@ -66,7 +66,7 @@ def get_labels_samples(dir):
 if len(sys.argv) > 2:
     i = sys.argv[1]
 
-    directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
+    directory = '../MIDI/Train/' + i + '/'
     labels, mels1, mels2, mels3 = get_labels_samples(directory)
 
     file = open(directory + '/rnnBassData_cqt_mel.pkl', 'wb')
@@ -76,25 +76,10 @@ if len(sys.argv) > 2:
 
 else:
     for i in ['1', 'all']:
-        directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
+        directory = '../MIDI/Train/' + i + '/'
         labels, mels1, mels2, mels3 = get_labels_samples(directory)
 
         file = open(directory + '/rnnBassData_cqt_mel.pkl', 'wb')
         pickle.dump((labels, mels1, mels2, mels3), file)
         file.close()
         print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, mels1.shape))
-
-
-
-"""
-midi_files = glob.glob('MIDI/*.mid')
-
-midis = []
-
-for file in midi_files:
-    new_midi = MidiData(file)
-    new_audio = AudioData(new_midi.path+'.wav', win_len=4096, hop_len=1024, HPSS=False)
-    print('Midi {} tiene {} notas de bajo'.format(new_midi.name, len(new_midi.gt_bass)))
-    midis.append(new_midi)
-    plot_segmentation(new_midi, new_midi.gt_bass,'gt_bass')
-"""
