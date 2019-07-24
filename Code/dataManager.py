@@ -678,14 +678,18 @@ class DataManager:
         n_samples = mel1.shape[0]
         n_features = curr_samples.shape[1]
 
-        curr_samples = curr_samples.reshape((1, curr_samples.shape))
+        curr_samples = curr_samples.reshape((1, curr_samples.shape[0],
+                                             curr_samples.shape[1]))
         predictions = model.predict(curr_samples, batch_size=1024,
                                     verbose=1)
 
         #predictions = predictions[2000:5000,:]
         b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
                                     output='ba')
-        detect_function = scipy.signal.lfilter(b, a, predictions[:,1])
+        detect_function = scipy.signal.lfilter(b, a, predictions[0,:,1])
+        print('predictions.shape {}, detect_function.shape {}'.format(predictions.shape, detect_function.shape))
+        detect_function = detect_function.reshape((1,detect_function.shape[0]))
+        print('detect_function.shape {}'.format(detect_function.shape))
         peaks, _ = scipy.signal.find_peaks(detect_function, height=0.5,
                                            distance=20)
 
