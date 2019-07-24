@@ -671,29 +671,28 @@ class DataManager:
         mn_mel3 = np.min(_mel3)
         mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
-        seq_len = 200
-
         curr_samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
         n_samples = mel1.shape[0]
         n_features = curr_samples.shape[1]
-
         curr_samples = curr_samples.reshape((1, curr_samples.shape[0],
                                              curr_samples.shape[1]))
+
         predictions = model.predict(curr_samples, batch_size=1024,
-                                    verbose=1)
+                                    verbose=0)
 
         #predictions = predictions[2000:5000,:]
-        b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
-                                    output='ba')
-        detect_function = scipy.signal.lfilter(b, a, predictions[0,:,1])
-        peaks, _ = scipy.signal.find_peaks(detect_function, height=0.5,
+        # b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
+        #                             output='ba')
+        detect_function = predictions[0, :, 1]
+        #scipy.signal.lfilter(b, a, predictions[0,:,1])
+        peaks, _ = scipy.signal.find_peaks(detect_function, height=0,
                                            distance=20)
 
         plt.clf()
         predictions_ = predictions[0, 2000:5000,1]
         plt.plot(predictions_)
-        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.5, distance=20)
+        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0, distance=20)
         plt.plot(peaks_, predictions_[peaks_], 'x')
         plt.savefig(audio_data.name + '_bassRnn.eps', format='eps', dpi=100)
         plt.clf()
