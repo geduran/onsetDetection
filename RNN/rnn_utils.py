@@ -7,15 +7,17 @@ import matplotlib.pyplot    as plt
 import keras
 from   scipy.io             import loadmat
 from   keras.models         import Sequential, Model
-from keras.layers           import GRU, LSTM, SimpleRNN, Dropout, Dense, Activation, Bidirectional
+from   keras.layers         import GRU, LSTM, SimpleRNN, Dropout, Dense
+from   keras.layers         import Activation, Bidirectional, TimeDistributed
 #from   keras.layers         import Flatten, BatchNormalization, regularizers
 #from   keras.layers         import Conv2D, MaxPooling2D
 from   keras.callbacks      import ModelCheckpoint, EarlyStopping, Callback
 from   keras.utils.np_utils import to_categorical
-import keras.backend as K
-from sklearn.metrics import confusion_matrix, precision_score, f1_score, recall_score
+import keras.backend        as K
+from sklearn.metrics        import confusion_matrix, precision_score, f1_score, recall_score
+import sklearn.model_selection
 import os
-import tensorflow as tf
+import tensorflow           as tf
 import random
 import pickle
 
@@ -99,12 +101,13 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
 
     model.add(RNN_type(n_hidden, return_sequences=True,
               input_shape=input_shape))
-    model.add(RNN_type(n_hidden, return_sequences=False))
+    model.add(RNN_type(n_hidden, return_sequences=True))
 
-    model.add(Dropout(0.25))
-
-    #Fully connected final layer
-    model.add(Dense(num_classes))
+    model.add(TimeDistributed(Dense(num_classes)))
+    # model.add(Dropout(0.25))
+    #
+    # #Fully connected final layer
+    # model.add(Dense(num_classes))
     model.add(Activation('softmax'))
 
     model.compile(loss        = keras.losses.binary_crossentropy,
@@ -114,19 +117,6 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
     model.summary()
 
     return model
-
-
-def deleteWeights(best_model,last_model):
-    if os.path.exists(best_model):
-        os.remove(best_model)
-    if os.path.exists(last_model):
-        os.remove(last_model)
-
-def evaluateRNN(model,X,y,st):
-    print('evaluating performance in '+st+' set ('+str(y.shape[0])+' samples)...')
-    score   = model.evaluate(X,y,verbose=0)
-    print(st+' loss:', score[0])
-    print(st+' accuracy:', score[1])
 
 def defineCallBacks(model_file):
     #metrics = Metrics()
@@ -163,11 +153,10 @@ def loadAudioPatches(st_file):
     mn_mel3 = np.min(mel3)
     mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
 
-    seq_len = 10
+    seq_len = 200
 
     # print('mel1.shape {}, mel2.shape {}, mel3.shape {}'.format(mel1.shape, mel2.shape, mel3.shape))
     samples = np.concatenate((mel1, mel2, mel3), axis=1)
-
 
     print('samples.shape {}'.format(samples.shape))
 
@@ -178,93 +167,20 @@ def loadAudioPatches(st_file):
         ind.add(random.randint(0, samples.shape[0]-seq_len-1))
 
     X_train = np.zeros((n_samples, seq_len, n_features))
-    Y_train = np.zeros((n_samples, 2))
+    Y_train = np.zeros((n_samples, seq_len, 2))
 
     cont = 0
     for i in ind:
         print('Cargando Datos {}/{}'.format(cont,n_samples), end='\r')
         X_train[cont,:,:] = samples[i:i+seq_len,:]
-        if np.sum(labels[i+2:i+seq_len-2]):
-            Y_train[cont,1] = 1
-        else:
-            Y_train[cont,0] = 1
+        Y_train[cont, np.argwhere(labels[i:i+seq_len]<1), 0] = 1
+        Y_train[cont, np.argwhere(labels[i:i+seq_len]>0), 1] = 1
         cont += 1
 
-    n_test = n_samples//20
-    testIndex = set()
-    while len(testIndex) < n_test:
-        testIndex.add(random.randint(0, n_samples-n_test))
-
-    testIndex = list(testIndex)
-
-    X_test = X_train[testIndex,:,:]
-    Y_test = Y_train[testIndex,:]
-    X_train = np.delete(X_train, testIndex,axis=0)
-    Y_train = np.delete(Y_train, testIndex,axis=0)
+    split_data = sklearn.model_selection.train_test_split(X_train, Y_train,
+                                                          test_size=0.05)
+    X_train, X_test, Y_train, Y_test = split_data
     print('x_train: {}, x_test: {}, y_train: {}, y_test: {}'.format(X_train.shape, X_test.shape, Y_train.shape, Y_test.shape))
 
     classes  = [0, 1]
     return X_train, Y_train, X_test, Y_test, classes
-
-
-def evaluateLayer(model,K,X,st,num_layer,test_predict):
-    inp        = model.input                                           # input placeholder
-    outputs    = [layer.output for layer in model.layers]              # all layer outputs
-    functor    = K.function([inp, K.learning_phase()], outputs )       # evaluation function
-
-    test       = X[0]
-    test       = test.reshape(1,1,X.shape[2],X.shape[3])
-    layer_outs = functor([test, 1.])
-    x          = layer_outs[num_layer]
-    n          = X.shape[0]
-    m          = x.shape[1]
-
-    if test_predict == 1:
-        print('computing prediction output in ' +st +' set with '+str(n)+' samples...')
-        y = model.predict(X)
-        print('saving prediction in '+st+'_predict.npy ...')
-        np.save(st+'_predict',y)
-
-    if num_layer>0:
-        d = np.zeros((n,m))
-        print('computing output layer '+str(num_layer)+ ' in ' +st +' set with '+str(n)+' descriptors of '+str(m)+' elements...')
-        for i in range(n):
-            test       = X[i]
-            test       = test.reshape(1,1,X.shape[2],X.shape[3])
-            layer_outs = functor([test, 1.])
-            d[i]       = layer_outs[num_layer]
-        print('saving layer output in '+st+'_layer_'+str(num_layer)+'.npy ...')
-        np.save(st+'_layer_'+str(num_layer),d)
-
-def plotCurves(history):
-    # loss curves
-    print('displaying loss and accuracy curves...')
-    plt.figure(figsize=[8,6])
-    plt.plot(history.history['loss'],'r',linewidth=3.0)
-    plt.plot(history.history['val_loss'],'b',linewidth=3.0)
-    plt.legend(['Training loss', 'Validation Loss'],fontsize=18)
-    plt.xlabel('Epochs ',fontsize=16)
-    plt.ylabel('Loss',fontsize=16)
-    plt.title('Loss Curves',fontsize=16)
-    plt.show()
-
-    # accuracy curves
-    plt.figure(figsize=[8,6])
-    plt.plot(history.history['acc'],'r',linewidth=3.0)
-    plt.plot(history.history['val_acc'],'b',linewidth=3.0)
-    plt.legend(['Training Accuracy', 'Validation Accuracy'],fontsize=18)
-    plt.xlabel('Epochs ',fontsize=16)
-    plt.ylabel('Accuracy',fontsize=16)
-    plt.title('Accuracy Curves',fontsize=16)
-    plt.show()
-
-def computeConfussionMatrix(model,X,y):
-    print('computing confussion matrix...')
-    Y_prediction = model.predict(X)
-    Y_pred_classes = np.argmax(Y_prediction,axis = 1) # classes to one hot vectors
-    Y_true = np.argmax(y,axis = 1)                    # classes to one hot vectors
-    confusion_mtx = confusion_matrix(Y_true, Y_pred_classes)
-    print(confusion_mtx)
-    plt.figure(figsize=(10,8))
-    heatmap(confusion_mtx, annot=True, fmt="d")
-    plt.show()
