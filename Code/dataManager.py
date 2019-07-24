@@ -678,6 +678,7 @@ class DataManager:
         n_samples = mel1.shape[0]
         n_features = curr_samples.shape[1]
 
+        curr_samples = curr_samples.reshape((1, curr_samples.shape))
         predictions = model.predict(curr_samples, batch_size=1024,
                                     verbose=1)
 
