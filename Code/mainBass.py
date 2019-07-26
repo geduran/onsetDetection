@@ -10,8 +10,8 @@ import tensorflow    as     tf
 from audioData       import *
 from   keras         import backend as K
 from   keras.backend import tensorflow_backend
-from   cnn_utils     import sequentialCNN, defineCallBacks, loadAudioPatches
-from   rnn_utils     import sequentialRNN, defineCallBacks, loadAudioPatches
+from   cnn_utils     import sequentialCNN
+from   rnn_utils     import sequentialRNN
 from midiData        import *
 from dataManager     import *
 

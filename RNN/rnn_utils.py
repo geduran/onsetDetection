@@ -89,26 +89,23 @@ class Metrics(Callback):
 
 def sequentialRNN(input_shape,num_classes,n_hidden):
 
-    RNN_type = LSTM
+    RNN_type = GRU
 
     #Start Neural Network
     model = Sequential()
 
-    # model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True),
-    #                         input_shape=input_shape))
-    #
-    # model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True)))
+    model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True),
+                            input_shape=input_shape))
+    model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True)))
 
-    model.add(RNN_type(n_hidden, return_sequences=True,
-              input_shape=input_shape))
-    model.add(RNN_type(n_hidden, return_sequences=True))
+    # model.add(RNN_type(n_hidden, return_sequences=True,
+    #           input_shape=input_shape))
+    # model.add(RNN_type(n_hidden, return_sequences=True))
 
-    model.add(TimeDistributed(Dense(num_classes)))
+
+    model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
     # model.add(Dropout(0.25))
-    #
-    # #Fully connected final layer
-    # model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
+
 
     model.compile(loss        = keras.losses.binary_crossentropy,
                   optimizer   = keras.optimizers.RMSprop(),
@@ -138,20 +135,15 @@ def defineCallBacks(model_file):
 
 def loadAudioPatches(st_file):
     file = open(st_file, 'rb')
-    labels, mel1, mel2, mel3 = pickle.load(file)
+    _labels, mel1, mel2, mel3 = pickle.load(file)
     file.close()
 
-    mx_mel1 = np.max(mel1)
-    mn_mel1 = np.min(mel1)
-    mel1 = (mel1-mn_mel1) / (mx_mel1-mn_mel1)
+    labels = np.zeros(_labels.shape)
+    labels[3:] = _labels[:-3]
 
-    mx_mel2 = np.max(mel2)
-    mn_mel2 = np.min(mel2)
-    mel2 = (mel2-mn_mel2) / (mx_mel2-mn_mel2)
-
-    mx_mel3 = np.max(mel3)
-    mn_mel3 = np.min(mel3)
-    mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
+    mel1 = (mel1 - mel1.mean(axis=0)) / mel1.std(axis=0)
+    mel2 = (mel2 - mel2.mean(axis=0)) / mel2.std(axis=0)
+    mel3 = (mel3 - mel3.mean(axis=0)) / mel3.std(axis=0)
 
     seq_len = 200
 
@@ -160,9 +152,14 @@ def loadAudioPatches(st_file):
 
     print('samples.shape {}'.format(samples.shape))
 
-
     ind = np.arange(0, samples.shape[0] - seq_len, int(seq_len/4))
     n_samples = len(ind)
+    # ind = set()
+    # while len(ind) < n_samples:
+    #     rnd = random.randint(0, samples.shape[0]-seq_len-1)
+    #     if not np.sum(labels[rnd:rnd+5]):
+    #         ind.add(rnd)
+
     n_features = samples.shape[1]
     # ind = set()
     # while len(ind) < n_samples:
@@ -175,8 +172,7 @@ def loadAudioPatches(st_file):
     for i in ind:
         print('Cargando Datos {}/{}'.format(cont,n_samples), end='\r')
         X_train[cont,:,:] = samples[i:i+seq_len,:]
-        Y_train[cont, np.argwhere(labels[i:i+seq_len]<1), 0] = 1
-        Y_train[cont, np.argwhere(labels[i:i+seq_len]>0), 1] = 1
+        Y_train[cont,:,:] = to_categorical(labels[i:i+seq_len])
         cont += 1
 
     split_data = sklearn.model_selection.train_test_split(X_train, Y_train,

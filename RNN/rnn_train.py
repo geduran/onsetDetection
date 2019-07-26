@@ -48,7 +48,7 @@ X_train, Y_train, X_test, Y_test, classes = loadAudioPatches(audioPath)#loadPatc
 
 num_classes  = len(classes)
 num_samples = X_train.shape[0]
-input_shape  = (X_test.shape[1],X_test.shape[2])
+input_shape  = (None, X_test.shape[2])#(X_test.shape[1], X_test.shape[2])
 class_proportion = np.sum(Y_train[:,:,0])/np.sum(Y_train[:,:,1])
 
 # RNN architecture defintion
@@ -60,7 +60,7 @@ history = model.fit(X_train, Y_train,
       epochs          = epochs,
       verbose         = 1,
       validation_data = (X_test, Y_test),
-    #  class_weight    = {0: 1., 1: class_proportion},
+      # class_weight    = {0: 1., 1: class_proportion},
       shuffle         = True,
       callbacks       = callbacks)
 model.save_weights(last_model)

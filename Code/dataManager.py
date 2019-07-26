@@ -595,28 +595,18 @@ class DataManager:
 
     def bass_cnn_segmentation(self, audio_data, model):
 
-        file = open('../MIDI/Train/' + 'all/cnnBassData_cqt_mel.pkl', 'rb')
-        #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/' +
-                # 'codigos/RNN/1/BassData_mel.pkl'
-        _,  _cqt, _mel = pickle.load(file)
+        file = open('../MIDI/Train/1/rnnBassData_cqt_mel.pkl', 'rb')
+
+        _, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
 
-        seq_len = 32
+        mel1 = audio_data.features.bass_mel_spectrogram1_cnn
+        mel2 = audio_data.features.bass_mel_spectrogram2_cnn
+        mel3 = audio_data.features.bass_mel_spectrogram3_cnn
 
-        mel = audio_data.features.bass_mel_spectrogram
-        cqt = audio_data.features.bass_CQT
-
-        new_samples = np.zeros((mel.shape[0], cqt.shape[1]))
-        for i in np.arange(0, mel.shape[0]-1, 2):
-            new_samples[i//2, :] = (cqt[i,:] + cqt[i+1,:])/2
-        cqt = new_samples
-
-        cqt = (cqt-np.min(_cqt)) / (np.max(_cqt)-np.min(_cqt))
-        cqt = cqt.T
-        n_samples = cqt.shape[0]
-
-        mel = (mel-np.min(_mel)) / (np.max(_mel)-np.min(_mel))
-        mel = mel.T
+        mel1 = (mel1 - _mel1.mean(axis=0)) / _mel1.std(axis=0)
+        mel2 = (mel2 - _mel2.mean(axis=0)) / _mel2.std(axis=0)
+        mel3 = (mel3 - _mel3.mean(axis=0)) / _mel3.std(axis=0)
 
         evaluate_samples = np.zeros((n_samples-seq_len, 2, seq_len,
                                     mel.shape[1]))
@@ -650,7 +640,7 @@ class DataManager:
 
     def bass_rnn_segmentation(self, audio_data, model):
 
-        file = open('../MIDI/Train/' + '1/rnnBassData_cqt_mel.pkl', 'rb')
+        file = open('../MIDI/Train/1/rnnBassData_cqt_mel.pkl', 'rb')
 
         _, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
@@ -659,40 +649,34 @@ class DataManager:
         mel2 = audio_data.features.bass_mel_spectrogram2
         mel3 = audio_data.features.bass_mel_spectrogram3
 
-        mx_mel1 = np.max(_mel1)
-        mn_mel1 = np.min(_mel1)
-        mel1 = (mel1-mn_mel1) / (mx_mel1-mn_mel1)
-
-        mx_mel2 = np.max(_mel2)
-        mn_mel2 = np.min(_mel2)
-        mel2 = (mel2-mn_mel2) / (mx_mel2-mn_mel2)
-
-        mx_mel3 = np.max(_mel3)
-        mn_mel3 = np.min(_mel3)
-        mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
+        mel1 = (mel1 - _mel1.mean(axis=0)) / _mel1.std(axis=0)
+        mel2 = (mel2 - _mel2.mean(axis=0)) / _mel2.std(axis=0)
+        mel3 = (mel3 - _mel3.mean(axis=0)) / _mel3.std(axis=0)
 
         curr_samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
-        n_samples = mel1.shape[0]
-        n_features = curr_samples.shape[1]
+        # n_samples = mel1.shape[0]
+        # n_features = curr_samples.shape[1]
         curr_samples = curr_samples.reshape((1, curr_samples.shape[0],
                                              curr_samples.shape[1]))
 
         predictions = model.predict(curr_samples, batch_size=1024,
                                     verbose=0)
-
-        #predictions = predictions[2000:5000,:]
-        # b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
+        # b, a = scipy.signal.butter(2, 0.8,btype='lowpass', analog=False,
         #                             output='ba')
+
         detect_function = predictions[0, :, 1]
-        #scipy.signal.lfilter(b, a, predictions[0,:,1])
-        peaks, _ = scipy.signal.find_peaks(detect_function, height=0,
+        # detect_function = np.argmax(predictions[0,:,:], axis=1)
+        # print(detect_function.shape)
+
+        # detect_function = scipy.signal.lfilter(b, a, predictions[0,:,1])
+        peaks, _ = scipy.signal.find_peaks(detect_function, height=0.05,
                                            distance=20)
 
         plt.clf()
-        predictions_ = predictions[0, 2000:5000,1]
+        predictions_ = detect_function[2000:5000] #predictions[0, 2000:5000,1]
         plt.plot(predictions_)
-        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0, distance=20)
+        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.05, distance=20)
         plt.plot(peaks_, predictions_[peaks_], 'x')
         plt.savefig(audio_data.name + '_bassRnn.eps', format='eps', dpi=100)
         plt.clf()
