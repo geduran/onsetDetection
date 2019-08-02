@@ -1,0 +1,16 @@
+CNN -> Mel spectrograms at 256 hop length, win length; 4096, 248 and 1024 (freq range limited to 2kHz)
+	two hidden layers: 32 of 5x5 and 16 3x3. Each with relu and maxpool2d and batch normalization
+	FC layer with 20 units, relu and drpout 0.25
+	softmax and the output
+	BCL and adam optimizer	
+	peak distance 20 and thr 0.5
+
+
+RNN -> Mel spectrograms at 256 hop length, win length; 4096, 248 and 1024 (freq range limited to 1kHz)
+	GRU cell(60 hidden units), trained over seq of 400 with time distributed. 
+	focal_loss and RMSprop optimizer.
+ 	peak distance 15 and thr 0.2
+       
+
+Labels ONLY BASS
+50ms of tolerance time range
