@@ -32,11 +32,11 @@ config  = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
 session = tf.Session(config=config)
 tensorflow_backend.set_session(session)
 
-input_shape  = (2, 32, 24)
+input_shape  = (3, 10, 39)
 batch_size    = 128
 droprate      = 0.25
 num_classes  = 2
-n_hidden = 40
+n_hidden = 60
 n_layers = 1
 
 
@@ -61,7 +61,7 @@ for trainVal in listDB:
         cnn_model_path = ('../CNN/best_model_' +
                           mode+'_cnnBass.h5')
 
-        cnn_model = sequentialCNN(input_shape,num_classes)
+        cnn_model = sequentialCNN(input_shape)
 
         cnn_model.load_weights(cnn_model_path)
 
@@ -81,11 +81,11 @@ for trainVal in listDB:
             audio = AudioData(midi_path[:-3]+'wav', win_len=4096, hop_len=256,
                               HPSS=False, only_bass=False)
 
-            _chroma, _multi, _cnn, _rnn = BM.segment_bass(audio, midi, cnn_model, rnn_model, HPSS)
-            results['chroma_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _chroma)
-            results['multi_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _multi)
-            results['cnn_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _cnn)
-            results['rnn_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _rnn)
+            _chroma, _multi, _cnn, _rnn = BM.segment_bass(audio, midi, cnn_model, rnn_model, HPSS, mode)
+            results['chroma_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _chroma, name=midi.name + '_Chroma')
+            results['multi_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _multi, name=midi.name + '_Multi')
+            results['cnn_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _cnn, name=midi.name + '_CNN')
+            results['rnn_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _rnn, name=midi.name + '_RNN')
 
         pd_results = pd.DataFrame(results)
         pd_results.index = ['TP', 'FP', 'FN', 'recall', 'precision', 'f_score']
