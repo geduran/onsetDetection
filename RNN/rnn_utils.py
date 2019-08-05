@@ -96,18 +96,21 @@ def sequentialRNN(input_shape,num_classes,n_hidden):
 
     model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True),
                             input_shape=input_shape))
+
+    model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True)))
+
     model.add(Bidirectional(RNN_type(n_hidden, return_sequences=True)))
 
     # model.add(RNN_type(n_hidden, return_sequences=True,
     #           input_shape=input_shape))
     # model.add(RNN_type(n_hidden, return_sequences=True))
+    # model.add(Dropout(0.5))
 
 
     model.add(TimeDistributed(Dense(num_classes, activation='softmax')))
-    # model.add(Dropout(0.25))
 
 
-    model.compile(loss        = keras.losses.binary_crossentropy,
+    model.compile(loss        = [focal_loss],#keras.losses.binary_crossentropy,
                   optimizer   = keras.optimizers.RMSprop(),
                   metrics     = ['accuracy', f1, recall, precision])
 
@@ -139,26 +142,36 @@ def loadAudioPatches(st_file):
     file.close()
 
     labels = np.zeros(_labels.shape)
-    labels[3:] = _labels[:-3]
+    labels[1:] = _labels[:-1]
+    # labels = _labels
 
     mel1 = (mel1 - mel1.mean(axis=0)) / mel1.std(axis=0)
     mel2 = (mel2 - mel2.mean(axis=0)) / mel2.std(axis=0)
     mel3 = (mel3 - mel3.mean(axis=0)) / mel3.std(axis=0)
 
-    seq_len = 200
+    # diff1 = np.zeros(mel1.shape)
+    # diff1[1:,:] = mel1[1:,:] - mel1[:-1,:]
+    # diff2 = np.zeros(mel2.shape)
+    # diff2[1:,:] = mel2[1:,:] - mel2[:-1,:]
+    # diff3 = np.zeros(mel3.shape)
+    # diff3[1:,:] = mel3[1:,:] - mel3[:-1,:]
+
+    seq_len = 400
 
     # print('mel1.shape {}, mel2.shape {}, mel3.shape {}'.format(mel1.shape, mel2.shape, mel3.shape))
     samples = np.concatenate((mel1, mel2, mel3), axis=1)
 
     print('samples.shape {}'.format(samples.shape))
 
-    ind = np.arange(0, samples.shape[0] - seq_len, int(seq_len/4))
-    n_samples = len(ind)
-    # ind = set()
-    # while len(ind) < n_samples:
-    #     rnd = random.randint(0, samples.shape[0]-seq_len-1)
-    #     if not np.sum(labels[rnd:rnd+5]):
-    #         ind.add(rnd)
+    ind_ = np.arange(0, samples.shape[0] - seq_len, int(seq_len/8))
+    n_samples = len(ind_)
+
+    ind = []
+    for i in ind_:
+        if not np.sum(labels[i:i+10]):
+            ind.append(i)
+        else:
+            ind.append(i-12)
 
     n_features = samples.shape[1]
     # ind = set()
@@ -174,6 +187,7 @@ def loadAudioPatches(st_file):
         X_train[cont,:,:] = samples[i:i+seq_len,:]
         Y_train[cont,:,:] = to_categorical(labels[i:i+seq_len])
         cont += 1
+
 
     split_data = sklearn.model_selection.train_test_split(X_train, Y_train,
                                                           test_size=0.05)

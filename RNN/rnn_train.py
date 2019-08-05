@@ -25,7 +25,7 @@ onsetType = sys.argv[1]
 stage = sys.argv[2]
 
 epochs   = 100 # maximal number of epochs in training stage
-n_hidden = 40
+n_hidden = 60
 
 batch_size    = 128
 
