@@ -18,22 +18,14 @@ def get_labels_samples(dir):
         curr_audio = AudioData(file[:-4]+'.wav', win_len=4096, hop_len=256,
                                HPSS=False, only_bass=False)
 
-###########################################################
-        # curr_cqt = curr_audio.features.bass_CQT
-        # print('curr_cqt S.shape {}'.format(curr_cqt.shape))
         curr_mel1 = curr_audio.features.bass_mel_spectrogram1
         curr_mel2 = curr_audio.features.bass_mel_spectrogram2
         curr_mel3 = curr_audio.features.bass_mel_spectrogram3
 
-    #    new_samples = np.zeros((curr_mel.shape[0], curr_cqt.shape[1]))
-    #    for i in np.arange(0, curr_mel.shape[0]-1, 2):
-    #        new_samples[i//2, :] = (curr_cqt[i,:] + curr_cqt[i+1,:])/2
-    #    curr_cqt = new_samples
-##########################################################
 
-
-        # print('curr_cqt S.shape {}'.format(curr_cqt.shape))
-        # print('curr_mel S.shape {}'.format(curr_mel1.shape))
+        # print('mel1: {}, mel2: {}, mel3: {}'.format(curr_mel1.shape,
+        #                                             curr_mel2.shape,
+        #                                             curr_mel3.shape))
 
         curr_labels = np.zeros((curr_mel1.shape[0], 1), dtype=int)
 
@@ -48,8 +40,6 @@ def get_labels_samples(dir):
 
         if (all_labels.any() and all_mel1.any() and all_mel2.any() and
             all_mel3.any()):
-            # print('allmel1.shape {}, allmel2.shape {}, allmel3.shape {}'.format(all_mel1.shape,all_mel2.shape,all_mel3.shape))
-            # print('curr_mel1.shape {}, curr_mel2.shape {}, curr_mel3.shape {}'.format(curr_mel1.shape,curr_mel2.shape,curr_mel3.shape))
             all_labels = np.concatenate((all_labels, curr_labels), axis=0)
             all_mel1 = np.concatenate((all_mel1, curr_mel1), axis=0)
             all_mel2 = np.concatenate((all_mel2, curr_mel2), axis=0)
