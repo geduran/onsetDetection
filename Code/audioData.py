@@ -141,31 +141,45 @@ class AudioData:
                                                       frame_size=self.win_len,
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
+
         feature.bass_mel_spectrogram1 = madmom.audio.FilteredSpectrogram(audioFrame,
                                         filterbank=MelFilterbank, num_bands=40,
                                         fmin=40, fmax=1000)
+
+        feature.bass_mel_spectrogram1_cnn = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=39,
+                                        fmin=40, fmax=2000)
+
         print('Efectuando mel2 a {}      '.format(self.name), end="\r")
+
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len/2,
                                                       hop_size=self.hop_len,
-                                                      sample_rate=self.sr)
+                                                      sample_rate=self.sr
+                                                      )
         feature.bass_mel_spectrogram2 = madmom.audio.FilteredSpectrogram(audioFrame,
                                         filterbank=MelFilterbank, num_bands=40,
                                         fmin=40, fmax=1000)
+
+        feature.bass_mel_spectrogram2_cnn = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=39,
+                                        fmin=40, fmax=2000)
+
         print('Efectuando mel3 a {}      '.format(self.name), end="\r")
         audioFrame = madmom.audio.signal.FramedSignal(self.audio,
                                                       frame_size=self.win_len/4,
                                                       hop_size=self.hop_len,
                                                       sample_rate=self.sr)
+
         feature.bass_mel_spectrogram3 = madmom.audio.FilteredSpectrogram(audioFrame,
                                         filterbank=MelFilterbank, num_bands=40,
                                         fmin=40, fmax=1000)
 
-        feature.bass_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
-                                                                 fmax=600, n_mels=24, htk=False)
+        feature.bass_mel_spectrogram3_cnn = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=50,
+                                        fmin=40, fmax=2000)
 
-        feature.bass_mel_spectrogram_cnn = librosa.feature.melspectrogram(S=S_h ,sr=self.sr,
-                                                                 fmax=2000, n_mels=48, htk=False)
+
 
         # feature.chord_mel_spectrogram = librosa.feature.melspectrogram(S=S_h ,sr=self.sr)
 

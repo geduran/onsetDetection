@@ -5,31 +5,28 @@ import glob
 import os
 import sys
 
-
 def get_labels_samples(dir):
     files = glob.glob(dir + '*.mid')
 
     all_labels = np.array([])
-    all_cqt = np.array([])
-    all_mel = np.array([])
+    all_mel1 = np.array([])
+    all_mel2 = np.array([])
+    all_mel3 = np.array([])
 
     for file in files:
         curr_midi = MidiData(file)
-        curr_audio = AudioData(file[:-4]+'.wav', win_len=1024, hop_len=128, HPSS=False, only_bass=False)
+        curr_audio = AudioData(file[:-4]+'.wav', win_len=4096, hop_len=256,
+                               HPSS=False, only_bass=False)
 
-        curr_cqt = curr_audio.features.bass_CQT
-        print('curr_cqt S.shape {}'.format(curr_cqt.shape))
-        curr_mel = curr_audio.features.bass_mel_spectrogram
+        curr_mel1 = curr_audio.features.bass_mel_spectrogram1_cnn
+        curr_mel2 = curr_audio.features.bass_mel_spectrogram2_cnn
+        curr_mel3 = curr_audio.features.bass_mel_spectrogram3_cnn
 
-        new_samples = np.zeros((curr_mel.shape[0], curr_cqt.shape[1]))
-        for i in np.arange(0, curr_mel.shape[0]-1, 2):
-            new_samples[i//2, :] = (curr_cqt[i,:] + curr_cqt[i+1,:])/2
-        curr_cqt = new_samples
+        # print('mel1.shape: {}'.format(curr_mel1.shape))
+        # print('mel2.shape: {}'.format(curr_mel2.shape))
+        # print('mel3.shape: {}'.format(curr_mel3.shape))
 
-        print('curr_cqt S.shape {}'.format(curr_cqt.shape))
-        print('curr_mel S.shape {}'.format(curr_mel.shape))
-
-        curr_labels = np.zeros((curr_cqt.shape[1], 1), dtype=int)
+        curr_labels = np.zeros((curr_mel1.shape[0], 1), dtype=int)
 
         curr_hop = curr_audio.hop_len
         curr_sr = curr_audio.sr
@@ -37,50 +34,46 @@ def get_labels_samples(dir):
         for time in curr_midi.gt_bass:
             index = int(time*curr_sr/curr_hop)
             if index > len(curr_labels):
-                break
+                continue
             curr_labels[index] = 1
 
-        if all_labels.any() and all_cqt.any():
+        if (all_labels.any() and all_mel1.any() and all_mel2.any() and
+            all_mel3.any()):
             all_labels = np.concatenate((all_labels, curr_labels), axis=0)
-            all_cqt = np.concatenate((all_cqt, curr_cqt.T), axis=0)
-            all_mel = np.concatenate((all_mel, curr_mel.T), axis=0)
+            all_mel1 = np.concatenate((all_mel1, curr_mel1), axis=0)
+            all_mel2 = np.concatenate((all_mel2, curr_mel2), axis=0)
+            all_mel3 = np.concatenate((all_mel3, curr_mel3), axis=0)
         else:
             all_labels = curr_labels
-            all_cqt = curr_cqt.T
-            all_mel = curr_mel.T
+            all_mel1 = curr_mel1
+            all_mel2 = curr_mel2
+            all_mel3 = curr_mel3
 
-        #print('labels.shape: {}\nsamples.shape: {}\n'.format(all_labels.shape, all_samples.shape))
-
-    #means = np.mean(all_samples, axis=0)
-    #stds = np.std(all_samples, axis=0)
-    #all_samples = np.subtract(all_samples, means)
-    #all_samples = np.divide(all_samples, stds)
-
-    return all_labels, all_cqt, all_mel
+    return all_labels, all_mel1, all_mel2, all_mel3
 
 if len(sys.argv) > 2:
     i = sys.argv[1]
     directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
 
-    labels, cqts, mels = get_labels_samples(directory)
+    labels, mel1, mel2, mel3 = get_labels_samples(directory)
 
     file = open(directory + '/cnnBassData_cqt_mel.pkl', 'wb')
-    pickle.dump((labels, cqts, mels), file)
+    pickle.dump((labels, mel1, mel2, mel3), file)
     file.close()
-    print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
+    print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, mel1.shape))
 
 else:
     for i in ['1', 'all']:
         directory = '/home/geduran/Environments/onsetDetection/MIDI/Train/' + i + '/'
 
-        labels, cqts, mels = get_labels_samples(directory)
+        labels, mel1, mel2, mel3 = get_labels_samples(directory)
 
         file = open(directory + '/cnnBassData_cqt_mel.pkl', 'wb')
-        pickle.dump((labels, cqts, mels), file)
+        pickle.dump((labels, mel1, mel2, mel3), file)
         file.close()
 
     #print('\n\nTenemos Labels.size {} y samples.size {}'.format(labels.shape, samples.shape))
-        print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, cqts.shape))
+        print('\n\nEn '+ i +' tenemos Labels.size {} y samples.size {}'.format(labels.shape, mel1.shape))
 
 
 

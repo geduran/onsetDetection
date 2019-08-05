@@ -10,11 +10,12 @@ class DataManager:
     Class with no attributes. It deals woth pre-computed data and performs
     onset detection, gets performances and plots results.
     """
-    def get_performance(self, ground_truth, detected, tolerance=5e-2):
+    def get_performance(self, ground_truth, detected, tolerance=5e-2, name=''):
 
         TP = 0
         FP = 0
         FN = 0
+        timeDiff = []
 
         total_gt = ground_truth.shape[0]
         total_det = detected.shape[0]
@@ -22,9 +23,14 @@ class DataManager:
         for dt in detected:
             for gt in ground_truth:
                 if np.abs(gt-dt) <= tolerance:
+                    timeDiff.append(gt-dt)
                     TP += 1
                     ground_truth = ground_truth[ground_truth!=gt]
                     break
+
+        # file = open(name + '.pkl', 'wb')
+        # pickle.dump(timeDiff, file)
+        # file.close()
 
         FN = total_gt - TP
         FP = total_det - TP
@@ -593,64 +599,74 @@ class DataManager:
                           audio_data.win_len/audio_data.hop_len)/audio_data.sr
 
 
-    def bass_cnn_segmentation(self, audio_data, model):
+    def bass_cnn_segmentation(self, audio_data, model, mode='', midi=0):
+        if not len(mode):
+            mode = '1'
 
-        file = open('../MIDI/Train/' + 'all/cnnBassData_cqt_mel.pkl', 'rb')
-        #file = '/Users/gabrielduran007/Desktop/University/MAGISTER/' +
-                # 'codigos/RNN/1/BassData_mel.pkl'
-        _,  _cqt, _mel = pickle.load(file)
+        file = open('../MIDI/Train/' +mode+'/cnnBassData_cqt_mel.pkl', 'rb')
+        _, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
 
-        seq_len = 32
+        mel1 = audio_data.features.bass_mel_spectrogram1_cnn
+        mel2 = audio_data.features.bass_mel_spectrogram2_cnn
+        mel3 = audio_data.features.bass_mel_spectrogram3_cnn
 
-        mel = audio_data.features.bass_mel_spectrogram
-        cqt = audio_data.features.bass_CQT
+        mel1 = (mel1 - _mel1.mean(axis=0)) / _mel1.std(axis=0)
+        mel2 = (mel2 - _mel2.mean(axis=0)) / _mel2.std(axis=0)
+        mel3 = (mel3 - _mel3.mean(axis=0)) / _mel3.std(axis=0)
 
-        new_samples = np.zeros((mel.shape[0], cqt.shape[1]))
-        for i in np.arange(0, mel.shape[0]-1, 2):
-            new_samples[i//2, :] = (cqt[i,:] + cqt[i+1,:])/2
-        cqt = new_samples
+        seq_len = 10
+        n_samples = mel1.shape[0]
 
-        cqt = (cqt-np.min(_cqt)) / (np.max(_cqt)-np.min(_cqt))
-        cqt = cqt.T
-        n_samples = cqt.shape[0]
-
-        mel = (mel-np.min(_mel)) / (np.max(_mel)-np.min(_mel))
-        mel = mel.T
-
-        evaluate_samples = np.zeros((n_samples-seq_len, 2, seq_len,
-                                    mel.shape[1]))
+        evaluate_samples = np.zeros((n_samples-seq_len, 3, seq_len,
+                                    mel1.shape[1]))
         for i in range(n_samples-seq_len):
-            evaluate_samples[i,0,:,:] = cqt[i:i+seq_len,:]
-            evaluate_samples[i,1,:,:] = mel[i:i+seq_len,:]
+            evaluate_samples[i,0,:,:] = mel1[i:i+seq_len,:]
+            evaluate_samples[i,1,:,:] = mel2[i:i+seq_len,:]
+            evaluate_samples[i,2,:,:] = mel3[i:i+seq_len,:]
 
         predictions = model.predict(evaluate_samples, batch_size=1024,
                                     verbose=0)
 
-        b, a = scipy.signal.butter(2, 0.8,btype='lowpass', analog=False,
-                                   output='ba')
-        detect_function = scipy.signal.lfilter(b, a, predictions[:,1])
+        # b, a = scipy.signal.butter(2, 0.8,btype='lowpass', analog=False,
+        #                            output='ba')
+        # detect_function = scipy.signal.lfilter(b, a, predictions[:,1])
+        detect_function = predictions[:,1]
         peaks, _ = scipy.signal.find_peaks(detect_function, height=0.5,
-                                           distance=20)
+                                           distance=15)
 
 
-        # plt.clf()
-        # predictions_ = predictions[2000:5000,1]
-        # plt.plot(predictions_)
-        # peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.5,
-                                              # distance=40)
-        # plt.plot(peaks_, predictions_[peaks_], 'x')
-        # plt.savefig(audio_data.name + '_bassCnn.eps', format='eps', dpi=100)
-        # plt.clf()
+        lbl = np.zeros((detect_function.shape), dtype=int)
+        for time in midi.gt_bass:
+            index = int(time*44100/256)
+            if index > len(lbl):
+                continue
+            lbl[index] = 1
 
-        peaks += int(seq_len/2)
+
+        plt.clf()
+        predictions_ = detect_function[2000:3500]
+        plt.plot(predictions_)
+        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.5,
+                                              distance=15)
+        plt.plot(peaks_, predictions_[peaks_], 'x')
+        lbl = lbl[2000:3500]
+        ps = np.argwhere(lbl)
+        for pp in ps:
+            plt.axvline(x=pp,ymin=0, ymax=1.05, color='g', linestyle='--', linewidth=1)
+        plt.xlabel('Frame Index')
+        plt.ylabel('Onset Probability')
+        plt.savefig(audio_data.name + '_bass_' +mode+'_Cnn.eps', format='eps', dpi=100)
+        plt.clf()
+
+        # peaks += int(seq_len/2)
 
         return (peaks * audio_data.hop_len +
                           audio_data.win_len/audio_data.hop_len)/audio_data.sr
 
-    def bass_rnn_segmentation(self, audio_data, model):
+    def bass_rnn_segmentation(self, audio_data, model, mode='', midi=0):
 
-        file = open('../MIDI/Train/' + '1/rnnBassData_cqt_mel.pkl', 'rb')
+        file = open('../MIDI/Train/'+mode+'/rnnBassData_cqt_mel.pkl', 'rb')
 
         _, _mel1, _mel2, _mel3 = pickle.load(file)
         file.close()
@@ -659,42 +675,53 @@ class DataManager:
         mel2 = audio_data.features.bass_mel_spectrogram2
         mel3 = audio_data.features.bass_mel_spectrogram3
 
-        mx_mel1 = np.max(_mel1)
-        mn_mel1 = np.min(_mel1)
-        mel1 = (mel1-mn_mel1) / (mx_mel1-mn_mel1)
+        mel1 = (mel1 - _mel1.mean(axis=0)) / _mel1.std(axis=0)
+        mel2 = (mel2 - _mel2.mean(axis=0)) / _mel2.std(axis=0)
+        mel3 = (mel3 - _mel3.mean(axis=0)) / _mel3.std(axis=0)
 
-        mx_mel2 = np.max(_mel2)
-        mn_mel2 = np.min(_mel2)
-        mel2 = (mel2-mn_mel2) / (mx_mel2-mn_mel2)
+        curr_features = np.concatenate((mel1, mel2, mel3), axis=1)
 
-        mx_mel3 = np.max(_mel3)
-        mn_mel3 = np.min(_mel3)
-        mel3 = (mel3-mn_mel3) / (mx_mel3-mn_mel3)
-
-        curr_samples = np.concatenate((mel1, mel2, mel3), axis=1)
-
-        n_samples = mel1.shape[0]
-        n_features = curr_samples.shape[1]
-        curr_samples = curr_samples.reshape((1, curr_samples.shape[0],
-                                             curr_samples.shape[1]))
+        # n_samples = mel1.shape[0]
+        # n_features = curr_samples.shape[1]
+        curr_samples = np.zeros((1, curr_features.shape[0],
+                                             curr_features.shape[1]))
+        curr_samples[0,:,:] = curr_features
 
         predictions = model.predict(curr_samples, batch_size=1024,
                                     verbose=0)
-
-        #predictions = predictions[2000:5000,:]
-        # b, a = scipy.signal.butter(2, 0.9,btype='lowpass', analog=False,
+        # b, a = scipy.signal.butter(2, 0.8,btype='lowpass', analog=False,
         #                             output='ba')
+        # print('predictions.shape: {}'.format(predictions.shape))
         detect_function = predictions[0, :, 1]
-        #scipy.signal.lfilter(b, a, predictions[0,:,1])
-        peaks, _ = scipy.signal.find_peaks(detect_function, height=0,
-                                           distance=20)
+        # detect_function = np.argmax(predictions[0,:,:], axis=1)
+        # print(detect_function.shape)
+
+        # detect_function = scipy.signal.lfilter(b, a, predictions[0,:,1])
+        peaks, _ = scipy.signal.find_peaks(detect_function, height=0.2,
+                                           distance=15)
+
+        lbl = np.zeros((detect_function.shape), dtype=int)
+        for time in midi.gt_bass:
+            index = int(time*44100/256)
+            if index > len(lbl):
+                continue
+            lbl[index] = 1
+
 
         plt.clf()
-        predictions_ = predictions[0, 2000:5000,1]
+        predictions_ = detect_function[2000:3500] #predictions[0, 2000:5000,1]
+        lbl = lbl[2000:3500]
+        ps = np.argwhere(lbl)
         plt.plot(predictions_)
-        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0, distance=20)
+        peaks_, _ = scipy.signal.find_peaks(predictions_, height=0.2,
+                                            distance=15)
         plt.plot(peaks_, predictions_[peaks_], 'x')
-        plt.savefig(audio_data.name + '_bassRnn.eps', format='eps', dpi=100)
+        for pp in ps:
+            plt.axvline(x=pp,ymin=0, ymax=1.05, color='g', linestyle='--', linewidth=1)
+        plt.xlabel('Frame Index')
+        plt.ylabel('Onset Probability')
+        plt.savefig(audio_data.name + '_bass_' +mode +'_Rnn.eps',
+                    format='eps', dpi=100)
         plt.clf()
 
         return (peaks * audio_data.hop_len +
@@ -710,7 +737,7 @@ class BassManager(DataManager):
         super().__init__()
 
 
-    def segment_bass(self , audio, midi, cnn_model, rnn_model, HPSS=False):
+    def segment_bass(self , audio, midi, cnn_model, rnn_model, HPSS=False, mode=''):
 
         print('analizando ' + audio.name)
         chroma_segmentation = self.chroma_segmentation(audio,
@@ -719,9 +746,9 @@ class BassManager(DataManager):
         multipitch_segmentation = self.get_multipitch(audio,
                                              win_len=2048,hop_len=256,
                                              HPSS=HPSS)
-        cnn_segmentation = self.bass_cnn_segmentation(audio, cnn_model)
+        cnn_segmentation = self.bass_cnn_segmentation(audio, cnn_model, mode, midi)
 
-        rnn_segmentation = self.bass_rnn_segmentation(audio, rnn_model)
+        rnn_segmentation = self.bass_rnn_segmentation(audio, rnn_model, mode, midi)
 
         self.check_segmentation(audio, audio.name +'bassChroma',
                                 chroma_segmentation)
