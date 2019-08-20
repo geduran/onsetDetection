@@ -1,0 +1,6 @@
+CNN not valid
+
+RNN -> Mel spectrograms at 256 hop length, win length; 4096, 248 and 1024
+	GRU cell(40 hidden units), trained over seq of 200 with time distributed. 
+	BCE loss and RMSprop optimizer.
+ 	peak distance 30 and thr 0.02
