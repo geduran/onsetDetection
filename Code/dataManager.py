@@ -10,7 +10,7 @@ class DataManager:
     Class with no attributes. It deals woth pre-computed data and performs
     onset detection, gets performances and plots results.
     """
-    def get_performance(self, ground_truth, detected, tolerance=5e-2, name=''):
+    def get_performance(self, ground_truth, detected, tolerance=2.5e-2, name=''):
 
         TP = 0
         FP = 0
@@ -746,9 +746,18 @@ class BassManager(DataManager):
         multipitch_segmentation = self.get_multipitch(audio,
                                              win_len=2048,hop_len=256,
                                              HPSS=HPSS)
-        cnn_segmentation = self.bass_cnn_segmentation(audio, cnn_model, mode, midi)
+        cnn_segmentation = self.bass_cnn_segmentation(audio, cnn_model, mode,
+                                                      midi)
 
-        rnn_segmentation = self.bass_rnn_segmentation(audio, rnn_model, mode, midi)
+        rnn_segmentation = self.bass_rnn_segmentation(audio, rnn_model, mode,
+                                                      midi)
+
+        librosa_segmentation = self.librosa_segmentation(audio, hop_len=256)
+
+        madmom_SF = self.madmom_specFlux(audio, win_len=2048, hop_len=256)
+        madmom_WP = self.madmom_weightedPhase(audio, win_len=2048, hop_len=256)
+        madmom_SPF = self.madmom_superFlux(audio, win_len=2048, hop_len=256)
+
 
         self.check_segmentation(audio, audio.name +'bassChroma',
                                 chroma_segmentation)
@@ -776,8 +785,96 @@ class BassManager(DataManager):
             self.plot_segmentation(midi, rnn_segmentation,
                                   'RNN_bass')
 
-        return chroma_segmentation, multipitch_segmentation, cnn_segmentation, rnn_segmentation
+        return chroma_segmentation, multipitch_segmentation, cnn_segmentation, rnn_segmentation, librosa_segmentation, madmom_SF, madmom_SPF, madmom_WP
 
+    def librosa_segmentation(self, audio_data, hop_len=256):
+        audio = audio_data.audio
+        audio = audio/max(audio)
+
+        b, a = scipy.signal.butter(2, (20/(audio_data.sr/2),
+                                   261/(audio_data.sr/2)),
+                                   btype='bandpass', analog=False, output='ba')
+        audioFilt = scipy.signal.lfilter(b, a, audio)
+
+        onset_frames = librosa.onset.onset_detect(audioFilt, sr=audio_data.sr,
+                                                  hop_length=hop_len)
+
+        onset_times = librosa.frames_to_time(onset_frames, hop_length=hop_len)
+
+        return onset_times
+
+
+    def madmom_weightedPhase(self, audio_data, win_len=2048, hop_len=256):
+        audio = audio_data.audio
+        audio = audio/max(audio)
+
+        b, a = scipy.signal.butter(2, (20/(audio_data.sr/2),
+                                   196/(audio_data.sr/2)),
+                                   btype='bandpass', analog=False, output='ba')
+        audioFilt = scipy.signal.lfilter(b, a, audio)
+
+        audioFrame = madmom.audio.signal.FramedSignal(audioFilt,
+                                                      frame_size=win_len,
+                                                      hop_size=hop_len,
+                                                      sample_rate=audio_data.sr
+                                                      )
+        spectrogram = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=40,
+                                        fmin=40, fmax=196)
+
+        diff = madmom.features.onsets.complex_flux(spectrogram)
+        peaks = madmom.features.onsets.peak_picking(diff, np.max(diff)*0.2)
+        onset_times = (peaks * hop_len + win_len/hop_len)/audio_data.sr
+
+        return onset_times
+
+    def madmom_specFlux(self, audio_data, win_len=2048, hop_len=256):
+        audio = audio_data.audio
+        audio = audio/max(audio)
+
+        b, a = scipy.signal.butter(2, (20/(audio_data.sr/2),
+                                   196/(audio_data.sr/2)),
+                                   btype='bandpass', analog=False, output='ba')
+        audioFilt = scipy.signal.lfilter(b, a, audio)
+
+        audioFrame = madmom.audio.signal.FramedSignal(audioFilt,
+                                                      frame_size=win_len,
+                                                      hop_size=hop_len,
+                                                      sample_rate=audio_data.sr
+                                                      )
+        spectrogram = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=40,
+                                        fmin=40, fmax=196)
+
+        diff = madmom.features.onsets.spectral_flux(spectrogram)
+        peaks = madmom.features.onsets.peak_picking(diff, np.max(diff)*0.4)
+        onset_times = (peaks * hop_len + win_len/hop_len)/audio_data.sr
+
+        return onset_times
+
+    def madmom_superFlux(self, audio_data, win_len=2048, hop_len=256):
+        audio = audio_data.audio
+        audio = audio/max(audio)
+
+        b, a = scipy.signal.butter(2, (20/(audio_data.sr/2),
+                                   196/(audio_data.sr/2)),
+                                   btype='bandpass', analog=False, output='ba')
+        audioFilt = scipy.signal.lfilter(b, a, audio)
+
+        audioFrame = madmom.audio.signal.FramedSignal(audioFilt,
+                                                      frame_size=win_len,
+                                                      hop_size=hop_len,
+                                                      sample_rate=audio_data.sr
+                                                      )
+        spectrogram = madmom.audio.FilteredSpectrogram(audioFrame,
+                                        filterbank=MelFilterbank, num_bands=40,
+                                        fmin=40, fmax=196)
+
+        diff = madmom.features.onsets.superflux(spectrogram)
+        peaks = madmom.features.onsets.peak_picking(diff, np.max(diff)*0.3)
+        onset_times = (peaks * hop_len + win_len/hop_len)/audio_data.sr
+
+        return onset_times
 
     def chroma_segmentation(self, audio_data, hop_len=1024, HPSS=False):
         factor = 1 # Numero de bins por nota

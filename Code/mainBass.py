@@ -81,11 +81,18 @@ for trainVal in listDB:
             audio = AudioData(midi_path[:-3]+'wav', win_len=4096, hop_len=256,
                               HPSS=False, only_bass=False)
 
-            _chroma, _multi, _cnn, _rnn = BM.segment_bass(audio, midi, cnn_model, rnn_model, HPSS, mode)
+            _chroma, _multi, _cnn, _rnn, _rosa, _SF, _SPF, _WP = BM.segment_bass(audio,
+                                                                   midi, cnn_model,
+                                                                   rnn_model, HPSS, mode)
+
             results['chroma_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _chroma, name=midi.name + '_Chroma')
             results['multi_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _multi, name=midi.name + '_Multi')
             results['cnn_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _cnn, name=midi.name + '_CNN')
             results['rnn_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _rnn, name=midi.name + '_RNN')
+            results['librosa_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _rosa, name=midi.name + '_Librosa')
+            results['madmomSF_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _SF, name=midi.name + '_SF')
+            results['madmomSPF_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _SPF, name=midi.name + '_SPF')
+            results['madmomWP_bass_' + midi.name] = BM.get_performance(midi.gt_bass, _WP, name=midi.name + '_WP')
 
         pd_results = pd.DataFrame(results)
         pd_results.index = ['TP', 'FP', 'FN', 'recall', 'precision', 'f_score']
@@ -119,8 +126,13 @@ for trainVal in listDB:
 
         methods[0] = methods[0].rename('chroma_bass_TOTAL')
         methods[1] = methods[1].rename('cnn_bass_TOTAL')
-        methods[2] = methods[2].rename('multi_bass_TOTAL')
-        methods[3] = methods[3].rename('rnn_bass_TOTAL')
+        methods[2] = methods[2].rename('librosa_bass_TOTAL')
+        methods[3] = methods[3].rename('madmomSF_bass_TOTAL')
+        methods[4] = methods[4].rename('madmomSPF_bass_TOTAL')
+        methods[5] = methods[5].rename('madmomWP_bass_TOTAL')
+        methods[6] = methods[6].rename('multi_bass_TOTAL')
+        methods[7] = methods[7].rename('rnn_bass_TOTAL')
+
 
         all_performances = []
         for method in methods:
